@@ -1,0 +1,35 @@
+# 为单因子测试添加设置文件
+
+# 回测开始日期
+start_date : '20070101'
+# 回测终止日期
+end_date : '20170405'
+
+# 待测试因子列表文件
+factor_list_file : 'D:/FactorLib/single_factor_test/factor_list.py'
+# 因子测试股票池,默认是全A. 其他待选项见const.py文件中MARKET_INDEX_DICT变量
+universe : '全A'
+# 因子换仓频率
+freq : '1m'
+# 因子缺失值处理方法,目前仅支持直接剔除
+nan_method : 'delete'
+
+# 因子分组方法,可传入多种方法,以列表形式保存
+grouping_method : ['typical','float_mv_neutral','industry_neutral']
+# 因子分组数量
+total_groups : 10
+# 行业中性分组时使用的行业名称
+neutral_industry_used : '中信一级'
+# 股票分层数量
+sub_groups :
+    float_mv : 20
+
+# 对比基准,默认为中证500
+benchmark : '000905'
+
+# 因子测试结果输出路径
+result_file_dir : 'D:/factors'
+
+
+
+
