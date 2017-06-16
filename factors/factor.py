@@ -5,12 +5,8 @@
 3. 因子名称和因子类型一旦设定无法更改
 """
 import pandas as pd
-from factor_manange import factor_operator
-from factor_performance.factor_measure import factor_measurer
 
 class factor(object):
-    operator = None
-    measurer = None
 
     def __init__(self, name, axe):
         self.name = name
@@ -20,14 +16,6 @@ class factor(object):
         self.Date = None
         self.IDs = None
         self.update_info()
-
-    @classmethod
-    def set_operator(cls, env):
-        factor.operator = factor_operator(env)
-
-    @classmethod
-    def set_measurer(cls, env):
-        factor.measurer = factor_measurer(env)
 
     def update_info(self):
         if self.type == 'series':

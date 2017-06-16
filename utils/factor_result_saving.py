@@ -121,5 +121,16 @@ def save_group_info_as_mat(factor, file_path, config, env):
     file_name = file_path + os.sep + factor.name + '_group_info.mat'
     savemat(file_name, data_dict)
 
+def save_stock_list(factor, file_path, config, env):
+    """
+    存储股票列表
+    """
+    for _m in factor.stock_list:
+        stock_list = factor.stock_list[_m]
+        stock_list['IDs'] = stock_list['IDs'].apply(tradecode_to_windcode)
+        file_name = "/".join([file_path, 'stock_list_', _m])
+        stock_list.to_csv(file_name, index=False)
+    
+
     
     

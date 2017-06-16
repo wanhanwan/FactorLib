@@ -1,11 +1,11 @@
 import pandas as pd
 import os
 
-from utils.datetime_func import getWeekLastDay,getWeekFirstDay,getMonthFirstDay,getMonthLastDay
+from utils.datetime_func import getWeekLastDay,getWeekFirstDay,getMonthFirstDay,getMonthLastDay, Datetime2DateStr
 
 class trade_calendar(object):
     allTradeDays = pd.read_csv(
-        os.sep.join(__file__.split(os.sep)[:-2])+os.sep+'resource/交易日.csv',
+        os.sep.join(__file__.split(os.sep)[:-2])+os.sep+'resource/trade_dates.csv',
         index_col=0, header=None, squeeze=True, dtype='str').values.tolist()
 
     def get_trade_days(self, start_date=None,end_date=None,freq='1d',first_or_last='L'):
@@ -39,6 +39,8 @@ class trade_calendar(object):
         return Rslt
 
     def tradeDayOffset(self, today, n, freq='1d', first_or_last='L'):
+        if isinstance(today, (pd.DatetimeIndex, pd.datetime)):
+            today = Datetime2DateStr(today)
         if n < 0:
             tempData = self.get_trade_days(end_date=today, freq=freq, first_or_last=first_or_last)
             tempData.sort(reverse=True)
@@ -55,3 +57,13 @@ class trade_calendar(object):
         else:
             return day in pd.DatetimeIndex(trade_calendar.allTradeDays)
 
+    def latest_trade_day(self, day, trade_days):
+        """
+        计算在trade_days中距离day最近的一天
+        :param day:
+        :param trade_days: DatetimeIndex
+        :return: latest_day
+        """
+        if day >= max(trade_days):
+            return day
+        return trade_days[trade_days > day][0]

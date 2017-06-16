@@ -90,8 +90,7 @@ def float_mv_neutral(factor,data_source,config):
         section_factor = common.ix[date]
         sub_group_id = _add_group_id(section_factor,'float_mkt_value',sub_groups)
         for size_id in range(1, sub_groups+1):
-            idx = sub_group_id.index[sub_group_id['group_id'] == size_id]
-            section_section_factor = section_factor.ix[idx, :]
+            section_section_factor = section_factor[sub_group_id['group_id'] == size_id]
             group_id = _add_group_id(section_section_factor,factor.axe,N,is_ascending)
 
             idx = pd.MultiIndex.from_product([[date], group_id.index])

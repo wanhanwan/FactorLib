@@ -63,7 +63,7 @@ def _parse_args(args,**kwargs):
         else:
             arg_value_str = argInfo[
             (argInfo['ArgName']==arg) & (argInfo['ArgValue']==kwargs[arg])]['ArgValueStr'].iat[0]
-            if arg_value_str == 'NaN':
+            if (arg_value_str == 'NaN') or pd.isnull(arg_value_str):
                 continue
         arg_str.append(
             "{arg_name}={arg_value}".format(
@@ -76,7 +76,10 @@ def _bar_to_dataframe(data):
     ids = list(map(windcode_to_tradecode, data.Codes))
     dates = [x.date() for x in data.Times]
     col = pd.Index(ids, name='IDs')
-    df = pd.DataFrame(data.Data).T
+    if len(dates) == 1:
+        df = pd.DataFrame(data.Data)
+    else:
+        df = pd.DataFrame(data.Data).T
     df.index = pd.DatetimeIndex(dates,name='date')
     df.columns = col
     df = df.stack().to_frame().sort_index().rename(columns={0:data.Fields[0].lower()})

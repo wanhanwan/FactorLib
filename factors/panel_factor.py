@@ -1,65 +1,60 @@
 from .factor import factor
+from factor_portfolio import FactorGroups
+from factor_performance.fund_performance import LongShortReturn, FactorGroupReturn
+from factor_performance.ic_analyser import IC_Analyzer
+import pandas as pd
 
 class panelFactor(factor):
     def __init__(self, name, axe, direction=1):
         super(panelFactor, self).__init__(name, axe)
         self.direction = direction
-        self.grouping_info = {}
-        self.group_return = {}
-        self.long_short_return = None
-        self.group_return_fig = None
-        self.first_group_active_return = {}
-        self.ic_series = None
-        self.ic_fig = None
+        self.group_info = FactorGroups()
+        self.stock_list = {}
+        self.data = pd.DataFrame()
+        self.group_return = FactorGroupReturn()
+        self.long_short_return = LongShortReturn()
+        self.first_group_active_return = LongShortReturn()
+        self.ic_series = IC_Analyzer()
 
-    # ------------------------数据操作------------------------------
-    def drop_nan(self,inplace=False):
-        return self.operator.drop_nan(self,inplace)
+    def set_state(self, state):
+        self.group_return.set_state(state['group_return'])
+        self.group_info.set_state(state['group_info'])
+        self.ic_series.set_state(state['ic_series'])
+        self.first_group_active_return.set_state(state['first_group_active_return'])
+        self.long_short_return.set_state(state['long_short_return'])
+        self.stock_list = state['stock_list']
+        self.direction = state['direction']
 
-    def drop_untradable_stocks(self,inplace=False):
-        return self.operator.drop_untradable_stocks(self,inplace)
-
-    def grouping(self):
-        return self.operator.grouping(self)
-
-    def save_info(self):
-        return self.operator.save_factor(self)
+    def get_state(self):
+        _d = {}
+        _d['name'] = self.name
+        _d['axe'] = self.axe
+        _d['direction'] = self.direction
+        _d['group_info'] = self.group_info.get_state()
+        _d['stock_list'] = self.stock_list
+        _d['group_return'] = self.group_return.get_state()
+        _d['long_short_return'] = self.long_short_return.get_state()
+        _d['first_group_active_return'] = self.first_group_active_return.get_state()
+        _d['ic_series'] = self.ic_series.get_state()
+        return _d
     
-    def gen_stock_list(self):
-        """生成股票列表"""
-        return self.operator.gen_stock_list(self)
+    def initialize(self, env):
+        self.group_info.initialize(
+            methods=env._config.mod.grouping_manage.func,
+            n_groups=env._config.mod.grouping_manage.kwargs.total_groups
+        )
+        self.group_return.initialize(
+            methods=env._config.mod.grouping_manage.func,
+            n_groups=env._config.mod.grouping_manage.kwargs.total_groups                        
+        )
+        self.long_short_return.initialize(
+            methods=env._config.mod.grouping_manage.func
+        )
+        self.first_group_active_return.initialize(
+            methods=env._config.mod.grouping_manage.func
+        )        
 
-    # ------------------------因子表现------------------------------
-    def get_ic(self):
-        return self.measurer.get_ic(self)
-
-    def get_grouping_return(self):
-        return self.measurer.get_group_returns(self)
-
-    def get_long_short_return(self):
-        self.measurer.get_long_short_return(self)
 
 
-    def plot_performance(self):
-        return self.measurer.plot_performance(self)
-    
-    def get_first_group_active_return(self):
-        """计算第一组的表现"""
-        self.measurer.get_first_group_active_return(self)
-        
-        
-
-    # ----------------------因子测试---------------------------------
-    def start_back_test(self):
-        self.load_data()                           # 加载数据
-        self.drop_nan(inplace=True)                # 去掉缺失值
-        self.drop_untradable_stocks(inplace=True)  # 去掉不可交易股票的因子值
-        self.grouping()                            # 按照因子为股票分组
-        self.get_grouping_return()                 # 计算因子分组收益率
-        self.get_long_short_return()               # 分组多空收益率
-        self.get_first_group_active_return()       # 第一组的超额收益率
-        self.get_ic()                              # 计算因子的IC序列
-        self.plot_performance()                    # 绘图
-        self.save_info()                           # 存储因子信息
 
 

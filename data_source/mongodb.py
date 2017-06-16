@@ -196,7 +196,7 @@ class mongoDB(object):
                     
                     new = df[~df.index.isin(origin_items.index)][[column]]
                     if not new.empty:
-                        self._library.append(column,new[[column]])            
+                      self._library.append(column,new[[column]])            
         self.update_info()
         return 1
 
