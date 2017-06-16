@@ -92,9 +92,34 @@ class base_data_source(object):
         ret.columns = ['returns']
         return ret
 
-    
+    def get_history_bar(self, ids, start, end, adjust=False, type='stock', freq='1d'):
+        """
+         历史K线
+        :param ids: stock ids
+        :param start: start date
+        :param end: end date
+        :param adjust: 是否复权
+        :param type: stock or index
+        :param freq: frequency
+        :return: high open low close avgprice volume amount turnover pctchange
+        """
+        from functools import partial
+        dates = self.trade_calendar.get_trade_days(start, end, freq)
+        daily_dates = self.trade_calendar.get_trade_days(start, end)
+        if type == 'stock':
+            data_dict = {'/stocks/':['high','low','close', 'volume'],
+                         '/stock_liquidity/':['turn']}
+            data = self.h5DB.load_factors(data_dict, ids=ids, dates=daily_dates)
+        groupfunc = partial(self.trade_calendar.latest_trade_day, trade_days=pd.DatetimeIndex(dates))
+        group_dates = data.index.levels[0].to_series().apply(groupfunc)
+        data = data.join(group_dates.rename('group_date'))
+        cal_func = {'high':'max','low':'min',
+                    'close':'last','volume':'sum','turn':'sum'}
+        bar = data.groupby(['IDs','group_date']).agg(cal_func).swaplevel()
+        bar.index.names = ['date', 'IDs']
+        return bar
 
-    def get_stock_trade_status(self, ids=None, dates=None, start_date=None, end_date=None,freq='1d'):
+    def get_stock_trade_status(self, ids=None, dates=None, start_date=None, end_date=None, freq='1d'):
         """获得股票交易状态信息,包括停牌、ST、涨跌停"""
         if dates is None:
             dates = self.trade_calendar.get_trade_days(start_date=start_date,end_date=end_date,freq=freq)
