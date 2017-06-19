@@ -66,4 +66,4 @@ class trade_calendar(object):
         """
         if day >= max(trade_days):
             return day
-        return trade_days[trade_days > day][0]
+        return trade_days[trade_days >= day][0]
