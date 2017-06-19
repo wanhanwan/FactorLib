@@ -34,7 +34,7 @@ class base_data_source(object):
         elif (start_date is not None) or (end_date is not None):
             dates = self.trade_calendar.get_trade_days(start_date, end_date)
             return  self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
-    
+
     def get_period_return(self, ids, start_date, end_date, type='stock'):
         """计算证券的区间收益
         区间收益 = 开始日收盘价 / 终止日收盘价 - 1
@@ -65,7 +65,7 @@ class base_data_source(object):
         returns.columns = pd.MultiIndex.from_product([['returns'], pd.DatetimeIndex(dates)])
         returns.columns.names = ['returns', 'date']
         return returns.stack().swaplevel()
-    
+
     def get_past_ndays_return(self, ids, window, start_date, end_date, type='stock'):
         """计算证券在过去N天的累计收益"""
         data_init_date = self.trade_calendar.tradeDayOffset(start_date, -window)
@@ -92,7 +92,7 @@ class base_data_source(object):
         ret.columns = ['returns']
         return ret
 
-    
+
 
     def get_stock_trade_status(self, ids=None, dates=None, start_date=None, end_date=None,freq='1d'):
         """获得股票交易状态信息,包括停牌、ST、涨跌停"""
@@ -167,38 +167,40 @@ class sector(object):
         """
         dates = self.trade_calendar.get_trade_days(start_date, end_date) if dates is None else dates
         all_stocks = self.get_history_ashare(dates)
-        
+
         if isinstance(dates, str):
-            dates = [dates] 
+            dates = [dates]
+        if ids == '全A':
+            return all_stocks
         if ids in MARKET_INDEX_DICT:
             index_members = self.h5DB.load_factor('_%s' % ids, '/indexes/', dates=dates)
         elif ids in SW_INDUSTRY_DICT:
             temp = self.h5DB.load_factor('sw_level_1', '/indexes/', dates=dates)
-            index_members = temp[temp['sw_level_1']==int(ids)]
+            index_members = temp[temp['sw_level_1'] == int(ids)]
         else:
-            temp = self.h5DB.load_factor('cs_level_1', dates=dates)
-            index_members = temp[temp['cs_level_1']==int(ids[2:])]            
+            temp = self.h5DB.load_factor('cs_level_1', '/indexes/', dates=dates)
+            index_members = temp[temp['cs_level_1'] == int(ids[2:])]
         return  index_members[index_members.index.isin(all_stocks.index)]
 
     def get_stock_industry_info(self, ids, industry='中信一级', start_date=None, end_date=None, dates=None):
         """股票行业信息"""
         dates = self.trade_calendar.get_trade_days(start_date, end_date) if dates is None else dates
-        if not isinstance(dates,list):
+        if not isinstance(dates, list):
             dates = [dates]
         symbol = parse_industry(industry)
         industry_info = self.h5DB.load_factor(symbol, '/indexes/', ids=ids, dates=dates)
         return get_industry_names(symbol, industry_info)
-    
+
     def get_index_weight(self, ids, start_date=None, end_date=None, dates=None):
         """获取指数个股权重"""
         dates = self.trade_calendar.get_trade_days(start_date, end_date) if dates is None else dates
         symbol = '_{id}_weight'.format(id=ids)
-        
+
         weight = self.h5DB.load_factor(symbol, '/indexes/', dates=dates).sort_index()
         weight = weight.unstack().reindex(pd.DatetimeIndex(dates), method='ffill').stack()
         weight.index.names = ['date', 'IDs']
         return weight
-    
+
     def get_index_industry_weight(self, ids, industry_name='中信一级', start_date=None,
                                   end_date=None, dates=None):
         """获取指数的行业权重"""
@@ -217,13 +219,13 @@ class sector(object):
             date = [date]
         stocks = self.h5DB.load_factor('ashare', '/indexes/', dates=date)
         return stocks
-    
+
     def get_ashare_onlist(self, date, months_filter=24):
         """获得某一天已经上市的公司，并且上市日期不少于24个月"""
         ashare = self.get_history_ashare(date).swaplevel()
         ashare_onlist_date = self.h5DB.load_factor('list_date', '/stocks/').reset_index(level=0,drop=True)
         ashare_info = pd.merge(ashare, ashare_onlist_date, left_index=True, right_index=True, how='left').reset_index()
-        
+
         onlist_period = ashare_info['date'] - ashare_info['list_date'].apply(DateStr2Datetime)
         temp_ind = (onlist_period / timedelta(1)) > months_filter * 30
         return ashare_info.set_index(['date', 'IDs']).loc[temp_ind.values, ['list_date']].copy()

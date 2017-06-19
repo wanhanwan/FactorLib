@@ -66,7 +66,9 @@ class H5DB(object):
     def get_date_range(self, factor_name, factor_path):
         return tuple(self.data_dict.loc[(self.data_dict['path']==factor_path) &
                               (self.data_dict['name']==factor_name), ['min_date', 'max_date']].stack())
+
     #--------------------------数据管理-------------------------------------------
+
     def load_factor(self, factor_name, factor_dir=None, dates=None, ids=None, idx=None):
         factor_path = self.abs_factor_path(factor_dir, factor_name)
         panel = pd.read_hdf(factor_path, factor_name)
