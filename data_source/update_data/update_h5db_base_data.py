@@ -26,6 +26,12 @@ def index_weight(index_id, date):
     weight = d.Data[3]
     return ids, weight
 
+def onlist(start, end):
+    """股票的上市日期"""
+    d = get_ashare(end)
+    data = w.wsd(d, "ipo_date,backdoor,backdoordate", end, end, "")
+    list_date = data.Data[1]
+    
 def update_price(start, end):
     """更新价量行情数据"""
     field_names = "收盘价 涨跌幅 最高价 最低价 成交量"

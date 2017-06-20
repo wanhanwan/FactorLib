@@ -16,7 +16,7 @@ CS_INDUSTRY_DICT = {'CI005001':'石油石化','CI005002':'煤炭','CI005003':'�
 CS_INDUSTRY_DICT_REVERSE = {CS_INDUSTRY_DICT[x]: x for x in CS_INDUSTRY_DICT}
 
 MARKET_INDEX_DICT = {'000905':'中证500','000300':'沪深300','000906':'中证800','880011':'万得全A','000001':'上证综指',
-                     '399102':'创业板综', '000991': '中证全指医药'}
+                     '399102':'创业板综', '000991': '中证全指医药','guoqigaige_index':'国企改革概念'}
 
 INDUSTRY_NAME_DICT = {'中信一级':'cs_level_1','申万一级':'sw_level_1', '中信二级': 'cs_level_2', '申万一级': 'sw_level_2'}
 
