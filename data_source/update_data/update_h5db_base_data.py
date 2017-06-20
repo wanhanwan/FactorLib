@@ -1,27 +1,39 @@
 import pandas as pd
 import os
 from datetime import datetime
+from functools import lru_cache
 from WindPy import *
 
 from utils.tool_funcs import get_industry_code
 from utils.datetime_func import DateStr2Datetime
-from const import SW_INDUSTRY_DICT_REVERSE, CS_INDUSTRY_DICT_REVERSE
-from data_source import h5, mysql_engine, sec
+from data_source import h5, sec
 from data_source.wind_plugin import get_history_bar
 from data_source.data_api import get_trade_days, trade_day_offset
 from data_source.financial_data_source import BalanceSheet, IncomeSheet
+from update_data import index_members, sector_members, index_weights, industry_classes
 
-#-----------------------------------Mongo部分-------------------------------------
-engine = mysql_engine
+w.start()
+
+@lru_cache()
+def get_ashare(date):
+    d = w.wset("sectorconstituent","date={date};sectorid=a001010100000000".format(date=idate))
+    return d.Data[1]
+
+@lru_cache()
+def index_weight(index_id, date):
+    d = w.wset("indexconstituent","date=%s;windcode=%s"%(date, index_id))
+    ids = [x[:6] for x in d.Data[1]]
+    weight = d.Data[3]
+    return ids, weight
 
 def update_price(start, end):
     """更新价量行情数据"""
-    #field_names = "收盘价 涨跌幅 最高价 最低价 成交量"
-    #data = get_history_bar(field_names.split(),start,end,**{'复权方式':'不复权'})
-    #data.columns = ['close','daily_returns_%','high','low','vol']
-    #data['vol'] = data['vol'] / 100
-    #data['daily_returns'] = data['daily_returns_%'] / 100
-    #h5.save_factor(data,'/stocks/')
+    field_names = "收盘价 涨跌幅 最高价 最低价 成交量"
+    data = get_history_bar(field_names.split(),start,end,**{'复权方式':'不复权'})
+    data.columns = ['close','daily_returns_%','high','low','vol']
+    data['vol'] = data['vol'] / 100
+    data['daily_returns'] = data['daily_returns_%'] / 100
+    h5.save_factor(data,'/stocks/')
 
     field_names = "总市值 A股市值(不含限售股)"
     data = get_history_bar(field_names.split(),start,end)
@@ -46,196 +58,82 @@ def update_price(start, end):
     data['vol'] = data['vol'] / 100
     h5.save_factor(data,'/indexprices/')
 
+def updateSectorConstituent(dates, windcode):
+    """更新某一个指数在时间序列上的成分股"""
+    l = []
+    for date in dates:
+        d = w.wset("sectorconstituent","date={date};windcode={windcode}".format(
+            date=date, windcode=windcode))
+        d = d.Data[1]
+        d = pd.DataFrame(d, columns=['IDs'])
+        d['_%s'%windcode[:6]] = 1
+        d['IDs'] = d['IDs'].str[:6]
+        d['date'] = DateStr2Datetime(date)
+        l.append(d)
+    d = pd.concat(l, ignore_index=True)
+    d = d.set_index(['date','IDs']).sort_index()
+    return d
+
+def updateSectorConstituent2(dates, sectorid, column_mark):
+    l = []
+    for date in dates:
+        d = w.wset("sectorconstituent","date={date};sectorid={sectorid}".format(
+            date=date, sectorid=windcode))
+        d = d.Data[1]
+        d = pd.DataFrame(d, columns=['IDs'])
+        d[column_mark] = 1
+        d['IDs'] = d['IDs'].str[:6]
+        d['date'] = DateStr2Datetime(date)
+        l.append(d)
+    d = pd.concat(l, ignore_index=True)
+    d = d.set_index(['date','IDs']).sort_index()
+    return d    
+
 def update_sector(start, end):
     """更新成分股信息"""
 
-    all_dates = get_trade_days(start,end)
-
-    w.start()
-    _000300 = []
-    _000905 = []
-    _399102 = []
-    _880011 = []
-    _st = []
-    _000906 = []
-    for date in all_dates:
-
-        d = w.wset("sectorconstituent","date={date};windcode=000300.SH".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['_000300']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _000300.append(d)
-
-        d = w.wset("sectorconstituent","date={date};windcode=000905.SH".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['_000905']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _000905.append(d)
-
-        d = w.wset("sectorconstituent","date={date};windcode=399102.SZ".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['_399102']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _399102.append(d)
-
-        d = w.wset("sectorconstituent","date={date};windcode=881001.WI".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['_880011']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _880011.append(d)
-        
-        d = w.wset("sectorconstituent","date={date};windcode=000906.SH".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['_000906']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _000906.append(d)        
-
-        d = w.wset("sectorconstituent","date={date};sectorid=1000006526000000".format(date=date))
-        d = d.Data[1]
-        d = pd.DataFrame(d,columns=['IDs'])
-        d['is_st']=1
-        d['IDs'] = d['IDs'].str[:6]
-        d['date'] = DateStr2Datetime(date)
-        _st.append(d)
-
-    d = pd.concat(_000300,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d,'/indexes/')
-
-    d = pd.concat(_000905,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d,'/indexes/')
-
-    d = pd.concat(_399102,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d,'/indexes/')
-
-    d = pd.concat(_880011,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d,'/indexes/')
+    all_dates = get_trade_days(start, end)
+    for index_id in index_members:
+        d = updateSectorConstituent(all_dates, index_id)
+        h5.save_factor(d, '/indexes/')
     
-    d = pd.concat(_000906,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d, '/indexes/')    
+    for sectorid, column_mark in sector_members.items():
+        d = updateSectorConstituent2(all_dates, sectorid, column_mark)
+        h5.save_factor(d, '/stocks/')
 
-    d = pd.concat(_st,ignore_index=True)
-    d = d.set_index(['date','IDs']).sort_index()
-    h5.save_factor(d,'/stocks/')
+
+def index_weight_panel(dates, index_id):
+    months = (trade_day_offset(x, -1, '1m') for x in dates)
+    l = []
+    for i, m in enumerate(months):
+        ids, weight = index_weight(index_id, m)
+        idx = pd.MultiIndex.from_product([[DateStr2Datetime(dates[i])], ids], names=['date','IDs'])
+        l.append(pd.Series(weight, index=idx))
+    d = pd.concat(l).to_frame().rename(columns={0:'_%s_weight'%index_id[:6]})
+    return d
 
 def update_idx_weight(start, end):
     """更新指数权重"""
-    sql_str = 'select '+','.join(['IDs','Dates','Weight'])
-    sql_str+=' from idx_weight_zz500 where Dates between %s and %s' % (start, end)
-    data = pd.read_sql(sql_str,engine)
-    if not data.empty:
-        data.columns = ['IDs','date','_000905_weight']
-        data.date = pd.DatetimeIndex(data.date)
-        data.set_index(['date','IDs'],inplace=True)
-        data.sort_index(inplace=True)
-        h5.save_factor(data,'/indexes/')
-
-    sql_str = 'select '+','.join(['IDs','Dates','Weight'])
-    sql_str+=' from idx_weight_hs300 where Dates between %s and %s' % (start, end)
-    data = pd.read_sql(sql_str,engine)
-    if not data.empty:
-        data.columns = ['IDs','date','_000300_weight']
-        data.date = pd.DatetimeIndex(data.date)
-        data.set_index(['date','IDs'],inplace=True)
-        data.sort_index(inplace=True)
-        h5.save_factor(data,'/indexes/')
-    
-    sql_str = 'select '+','.join(['IDs','Dates','Weight'])
-    sql_str+=' from idx_weight_000991 where Dates between %s and %s' % (start, end)
-    data = pd.read_sql(sql_str,engine)
-    if not data.empty:
-        data.columns = ['IDs','date','_000991_weight']
-        data.date = pd.DatetimeIndex(data.date)
-        data.set_index(['date','IDs'],inplace=True)
-        data.sort_index(inplace=True)
-        h5.save_factor(data,'/indexes/')        
-
-
-def update_sw_level_1(start, end):
-    excel_path = os.sep.join(os.path.abspath('.').split(os.sep)[:-2]+['resource', 'sw_level_1.xlsx'])
-    sw_level_1 = pd.read_excel(excel_path, header=0, converters={'entry_date': str, 'remove_dt': str, 'IDs': str})
-    sw_level_1.loc[pd.isnull(sw_level_1['remove_dt']), 'remove_dt'] = '21000101'
     all_dates = get_trade_days(start, end)
-    _l = []
-    for idate in all_dates:
-        data = sw_level_1.query("entry_date<=@idate & remove_dt>@idate" )[['IDs', 'sw_level_1']]
-        data['date'] = DateStr2Datetime(idate)
-        _l.append(data)
-    df = pd.concat(_l)
-    df.set_index(['date', 'IDs'], inplace=True)
-    df['industry_code'] = df['sw_level_1'].apply(lambda x: int(SW_INDUSTRY_DICT_REVERSE[x]))
-    h5.save_factor(df[['industry_code']].rename(columns={'industry_code': 'sw_level_1'}), '/indexes/')
+    for index_id in index_weights:
+        d = index_weight_panel(all_dates, index_id)
+        h5.save_factor(d, '/indexes/')
 
-def update_cs_level_1(start, end):
-    excel_path = os.sep.join(os.path.abspath('.').split(os.sep)[:-2]+['resource', 'cs_level_1.xlsx'])
-    sw_level_1 = pd.read_excel(excel_path, header=0, converters={'entry_date': str, 'remove_dt': str, 'IDs': str})
-    sw_level_1.loc[pd.isnull(sw_level_1['remove_dt']), 'remove_dt'] = '21000101'
-    all_dates = get_trade_days(start, end)
-    _l = []
-    for idate in all_dates:
-        data = sw_level_1.query("entry_date<=@idate & remove_dt>@idate" )[['IDs', 'cs_level_1']]
-        data['date'] = DateStr2Datetime(idate)
-        _l.append(data)
-    df = pd.concat(_l)
-    df.set_index(['date', 'IDs'], inplace=True)
-    df['industry_code'] = df['cs_level_1'].apply(lambda x: int(CS_INDUSTRY_DICT_REVERSE[x][2:]))
-    h5.save_factor(df[['industry_code']].rename(columns={'industry_code': 'cs_level_1'}), '/indexes/')
+def get_stock_industryname(stocks, date, industryid, industrytype):
+    data = w.wsd(stocks, industryid, date, date, "industryType=%s"%industrytype)
+    idx = pd.MultiIndex.from_product([[DateStr2Datetime(date)], [x[:6] for x in stocks]])
+    d = pd.Series(data.Data[0], index=idx)
+    return d
 
-def update_cs_level_2(start, end):
-    excel_path = os.sep.join(os.path.abspath('.').split(os.sep)[:-2]+['resource', 'cs_level_2.xlsx'])
-    cs_level_2 = pd.read_excel(excel_path, header=0, converters={'entry_dt': str, 'remove_dt': str, 'IDs': str})
+def update_industry_name(start, end):
     all_dates = get_trade_days(start, end)
-    _l = []
-    for idate in all_dates:
-        data = cs_level_2.query("entry_dt<=@idate & remove_dt>@idate" )[['IDs', 'cs_level_2']]
-        data['date'] = DateStr2Datetime(idate)
-        _l.append(data)
-    df = pd.concat(_l)
-    df.set_index(['date', 'IDs'], inplace=True)
-    h5.save_factor(get_industry_code('cs_level_2', df), '/indexes/')
-
-def update_sw_level_2(start, end):
-    excel_path = os.sep.join(os.path.abspath('.').split(os.sep)[:-2]+['resource', 'sw_level_2.xlsx'])
-    sw_level_2 = pd.read_excel(excel_path, header=0, converters={'entry_dt': str, 'remove_dt': str, 'IDs': str})
-    all_dates = get_trade_days(start, end)
-    _l = []
-    for idate in all_dates:
-        data = sw_level_2.query("entry_dt<=@idate & remove_dt>@idate" )[['IDs', 'sw_level_2']]
-        data['date'] = DateStr2Datetime(idate)
-        _l.append(data)
-    df = pd.concat(_l)
-    df.set_index(['date', 'IDs'], inplace=True)
-    h5.save_factor(get_industry_code('sw_level_2', df), '/indexes/')
-
-def update_ashare(start, end):
-    excel_path = os.sep.join(os.path.abspath('.').split(os.sep)[:-2]+['resource', 'stock_info.csv'])
-    stock_info = pd.read_csv(excel_path, header=0, converters={'S_INFO_LISTDATE':str,'S_INFO_DELISTDATE':str})
-    stock_info.loc[pd.isnull(stock_info['S_INFO_DELISTDATE']), 'S_INFO_DELISTDATE'] = '21000101'
-    all_dates = get_trade_days(start, end)
-    _l = []
-    for idate in all_dates:
-        data = stock_info.query("S_INFO_LISTDATE<=@idate & S_INFO_DELISTDATE>@idate" )[['S_INFO_WINDCODE', 'S_INFO_LISTDATE']]
-        data['date'] = DateStr2Datetime(idate)
-        data['ashare'] = 1
-        data['IDs'] = data['S_INFO_WINDCODE'].str[:6]
-        _l.append(data)
-    df = pd.concat(_l)
-    df.set_index(['date', 'IDs'], inplace=True)    
-    h5.save_factor(df[['ashare']], '/indexes/')
+    for column, indutryparams in industry_classes.items():
+        l = []
+        for idate in all_dates:
+            ids = get_ashare(idate)
+            l.append(get_stock_industryname(ids, idate, *industry_classes))
+        industry = pd.concat(l).to_frame().rename(columns={0:column})
+        h5.save_factor(industry, '/indexes/')
 
 def update_trade_status(start, end):
     dates = get_trade_days(start, end)
@@ -245,9 +143,9 @@ def update_trade_status(start, end):
     uplimit = sec.get_uplimit(dates)
     downlimit = sec.get_downlimit(dates)
 
-    trade_status = pd.concat([st,suspend,uplimit,downlimit],axis=1)
+    trade_status = pd.concat([st,suspend,uplimit,downlimit], axis=1)
     trade_status = trade_status.where(pd.isnull(trade_status), other=1)
-    trade_status.fillna(0,inplace=True)
+    trade_status.fillna(0, inplace=True)
     trade_status.columns = ['st','suspend','uplimit','downlimit']
     trade_status['no_trading'] = trade_status.any(axis=1).astype('int32')
     
@@ -283,9 +181,9 @@ def update_financial_data(start, end):
     oper_rev_ttm_back_1P.columns = ['oper_rev_last_ttm_back_1P']
     h5.save_factor(oper_rev_ttm_back_1P, '/stock_financial_data/')
     
-UpdateFuncs = [update_price, update_sector, update_idx_weight,
-                    update_sw_level_1, update_cs_level_1, update_cs_level_2, update_sw_level_2, 
-                    update_ashare, update_trade_status, update_financial_data]
-UpdateFuncs = [update_sw_level_1]
+UpdateFuncs = [update_price, update_sector, update_idx_weight,update_industry_name,
+                update_trade_status, update_financial_data]
+
+# UpdateFuncs = [update_sw_level_1]
 for iFunc in UpdateFuncs:
     iFunc('20170425', '20170502')
