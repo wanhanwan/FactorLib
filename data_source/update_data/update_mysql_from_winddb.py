@@ -308,8 +308,7 @@ def update_cashflowsheet(*args):
     data.to_csv("D:/data/h5/cashflowsheet.csv")
     print("现金流量表更新成功...")
 
-updateFuncs = [idx_weight_hs300, idx_weight_zz500, idx_weight_000991,update_balancesheet,
-               update_incomesheet, update_cashflowsheet]
+updateFuncs = [update_balancesheet,update_incomesheet, update_cashflowsheet]
 #updateFuncs = [update_balancesheet, update_incomesheet, update_cashflowsheet]
 for iFunc in updateFuncs:
     iFunc('20170503', '20170505')

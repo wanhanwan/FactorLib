@@ -240,20 +240,29 @@ class sector(object):
         index_industry_weight = common.reset_index().groupby(['date', symbol])[index_weight.columns[0]].sum()
         return index_industry_weight
 
-    def get_history_ashare(self, date):
+    def get_history_ashare(self, dates):
         """获得某一天的所有上市A股"""
-        if isinstance(date, str):
-            date = [date]
-        stocks = self.h5DB.load_factor('ashare', '/indexes/', dates=date)
+        if isinstance(dates, str):
+            dates = [dates]
+        stocks = self.h5DB.load_factor('ashare', '/indexes/', datess=dates)
         return stocks
 
-    def get_ashare_onlist(self, date, months_filter=24):
+    def get_ashare_onlist(self, dates, months_filter=24):
         """获得某一天已经上市的公司，并且上市日期不少于24个月"""
-        ashare = self.get_history_ashare(date).swaplevel()
-        ashare_onlist_date = self.h5DB.load_factor('list_date', '/stocks/').reset_index(level=0,drop=True)
-        ashare_info = pd.merge(ashare, ashare_onlist_date, left_index=True, right_index=True, how='left').reset_index()
-
-        onlist_period = ashare_info['date'] - ashare_info['list_date'].apply(DateStr2Datetime)
+        ashare = self.get_history_ashare(dates).swaplevel()
+        ashare_onlist_date = self.h5DB.load_factor(
+            'list_date', '/stocks/').reset_index(level=0, drop=True)
+        ashare_backdoordate = self.h5DB.load_factor(
+            'backdoordate', '/stocks/').reset_index(level=0, drop=True)   # 借壳上市日期
+        ashare_info = pd.merge(ashare, ashare_onlist_date, left_index=True, right_index=True, how='left')
+        ashare_info = ashare_info.join(ashare_backdoordate).reset_index()
+        def f:
+            if x['date'] >= DateStr2Datetime(x['backdoordate']):
+                return x['backdoordate']
+            else:
+                return x['list_date']
+        ashare_info['list_date'] = ashare_info.apply(f, axis=1)
+        onlist_period = ashare_info['date'] - ashare_info['new_listdate'].apply(DateStr2Datetime)
         temp_ind = (onlist_period / timedelta(1)) > months_filter * 30
         return ashare_info.set_index(['date', 'IDs']).loc[temp_ind.values, ['list_date']].copy()
 

@@ -29,8 +29,18 @@ def index_weight(index_id, date):
 def onlist(start, end):
     """股票的上市日期"""
     d = get_ashare(end)
-    data = w.wsd(d, "ipo_date,backdoor,backdoordate", end, end, "")
-    list_date = data.Data[1]
+    idx = pd.MultiIndex.from_product([[DateStr2Datetime("19000101")],[x[:6] for x in d]],
+                                        names=['date', 'IDs'])
+    data = w.wsd(d, "ipo_date", end, end, "")
+    list_date = [x.strftime("%Y%m%d") for x in data.Data[1]]
+    list_date = pd.DataFrame(list_date, index=idx, columns=['list_date'])
+    data = w.wsd(d, "backdoordate", end, end, "")
+    backdoordate = [x.strftime("%Y%m%d" for x in data.Data[1]]
+    backdoordate = pd.DataFrame(backdoordate, index=idx, columns=['backdoordate'])
+    backdoordate.fillna('21000101', inplace=True)
+    h5.save_factor(list_date, '/stocks/')
+    h5.save_factor(backdoordate, '/stocks/')
+
     
 def update_price(start, end):
     """更新价量行情数据"""
@@ -143,7 +153,7 @@ def update_industry_name(start, end):
 
 def update_trade_status(start, end):
     dates = get_trade_days(start, end)
-    
+
     st = sec.get_st(dates)
     suspend = sec.get_suspend(dates)
     uplimit = sec.get_uplimit(dates)
@@ -154,7 +164,7 @@ def update_trade_status(start, end):
     trade_status.fillna(0, inplace=True)
     trade_status.columns = ['st','suspend','uplimit','downlimit']
     trade_status['no_trading'] = trade_status.any(axis=1).astype('int32')
-    
+
     h5.save_factor(trade_status, '/trade_status/')
 
 def update_financial_data(start, end):
