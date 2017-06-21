@@ -11,7 +11,7 @@ sec = sector(h5, tc)
 data_source = base_data_source(sec)
 
 # mysql引擎
-mysql_engine = create_engine('mysql+pymysql://root:123456@localhost/barrafactors')
+# mysql_engine = create_engine('mysql+pymysql://root:123456@localhost/barrafactors')
 
 # oracle引擎
 #oracle_engine = create_engine("oracle://windfile:windfile@172.20.65.11:1521/wind")
