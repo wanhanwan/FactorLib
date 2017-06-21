@@ -244,7 +244,7 @@ class sector(object):
         """获得某一天的所有上市A股"""
         if isinstance(dates, str):
             dates = [dates]
-        stocks = self.h5DB.load_factor('ashare', '/indexes/', datess=dates)
+        stocks = self.h5DB.load_factor('ashare', '/indexes/', dates=dates)
         return stocks
 
     def get_ashare_onlist(self, dates, months_filter=24):
@@ -256,7 +256,7 @@ class sector(object):
             'backdoordate', '/stocks/').reset_index(level=0, drop=True)   # 借壳上市日期
         ashare_info = pd.merge(ashare, ashare_onlist_date, left_index=True, right_index=True, how='left')
         ashare_info = ashare_info.join(ashare_backdoordate).reset_index()
-        def f:
+        def f():
             if x['date'] >= DateStr2Datetime(x['backdoordate']):
                 return x['backdoordate']
             else:

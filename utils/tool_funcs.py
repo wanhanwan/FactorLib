@@ -1,5 +1,10 @@
 """一些工具函数"""
-from const import INDUSTRY_NAME_DICT, SW_INDUSTRY_DICT, CS_INDUSTRY_DICT
+from const import (INDUSTRY_NAME_DICT,
+                   SW_INDUSTRY_DICT,
+                   CS_INDUSTRY_DICT,
+                   SW_INDUSTRY_DICT_REVERSE,
+                   CS_INDUSTRY_DICT_REVERSE
+                   )
 import pandas as pd
 import os
 
@@ -72,8 +77,9 @@ def get_industry_names(industry_symbol, industry_info):
     return industry_info.join(series, on='industry_code', how='left')[[industry_symbol]]
 
 def get_industry_code(industry_symbol, industry_info):
-    level_2_excel = os.path.abspath(os.path.abspath("..") +'/..') + os.sep + "resource" + os.sep + "level_2_industry_dict.xlsx"
-    level_2_dict = pd.read_excel(level_2_excel, sheetname=industry_symbol, header=0)
+    if industry_symbol in ['sw_level_2', 'cs_level_2']:
+        level_2_excel = os.path.abspath(os.path.abspath("..") +'/..') + os.sep + "resource" + os.sep + "level_2_industry_dict.xlsx"
+        level_2_dict = pd.read_excel(level_2_excel, sheetname=industry_symbol, header=0)
     industry_info.columns = ['industry_code']
     if industry_symbol == 'cs_level_2':
         level_2_dict['Code'] = level_2_dict['Code'].apply(lambda x: int(x[2:]))
@@ -85,6 +91,16 @@ def get_industry_code(industry_symbol, industry_info):
         temp = industry_info.join(series, on='industry_code', how='left')[[industry_symbol]]
         temp = temp.unstack().fillna(method='backfill').stack().astype('int32')
         return temp
+    elif industry_symbol == 'sw_level_1':
+        industry_info[industry_symbol] = industry_info['industry_code'].map(SW_INDUSTRY_DICT_REVERSE)
+        industry_info.dropna(inplace=True)
+        industry_info[industry_symbol] = industry_info[industry_symbol].str[:6].astype('int32')
+        return industry_info[[industry_symbol]]
+    else:
+        industry_info[industry_symbol] = industry_info['industry_code'].map(CS_INDUSTRY_DICT_REVERSE)
+        industry_info.dropna(inplace=True)
+        industry_info[industry_symbol] = industry_info[industry_symbol].str[2:].astype('int32')
+        return industry_info[[industry_symbol]]        
 
 # 将某报告期回溯N期
 def RollBackNPeriod(report_date,n_period):

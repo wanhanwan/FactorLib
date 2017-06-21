@@ -13,6 +13,7 @@ workbook_path = os.sep.join(current_path.split(os.sep)[:2] + ['resource', 'wind_
 argInfoWB = xlrd.open_workbook(workbook_path) 
 argInfo = pd.read_excel(argInfoWB,sheetname='ArgInfo',engine='xlrd')
 
+w.start()
 # 行情数据接口
 def get_history_bar(field_names, start_date, end_date,id_type='stock', **kwargs):
     if not isinstance(field_names,list):
@@ -22,7 +23,6 @@ def get_history_bar(field_names, start_date, end_date,id_type='stock', **kwargs)
         field_info = pd.read_excel(argInfoWB,sheetname='收盘行情',engine='xlrd')
          # 按照字段循环取数据
         _l = []
-        w.start()
         for fieldName in field_names:
             field_name = field_info[field_info['FactorName']==fieldName]['FieldName'].iat[0]
             args = field_info[field_info['FactorName']==fieldName]['Args'].iat[0]
@@ -35,12 +35,10 @@ def get_history_bar(field_names, start_date, end_date,id_type='stock', **kwargs)
                 list(map(tradecode_to_windcode, all_ids)), field_name, start_date, end_date, params)
             _l.append(_bar_to_dataframe(data))
         data = pd.concat(_l,axis=1)
-        w.close()
     elif id_type == 'index':
         field_info = pd.read_excel(argInfoWB,sheetname='指数收盘行情',engine='xlrd')
         all_ids = [MARKET_INDEX_WINDCODE[x] for x in MARKET_INDEX_WINDCODE]
         _l = []
-        w.start()
         for fieldName in field_names:
             field_name = field_info[field_info['FactorName']==fieldName]['FieldName'].iat[0]
             args = field_info[field_info['FactorName']==fieldName]['Args'].iat[0]
@@ -49,7 +47,6 @@ def get_history_bar(field_names, start_date, end_date,id_type='stock', **kwargs)
             data = w.wsd(all_ids, field_name, start_date, end_date, params)
             _l.append(_bar_to_dataframe(data))
         data = pd.concat(_l,axis=1)
-        w.close()
     return data
 
 
