@@ -103,7 +103,7 @@ def get_industry_code(industry_symbol, industry_info):
         return industry_info[[industry_symbol]]        
 
 # 将某报告期回溯N期
-def RollBackNPeriod(report_date,n_period):
+def RollBackNPeriod(report_date, n_period):
     Date = report_date
     for i in range(1,n_period+1):
         if Date[-4:]=='1231':
@@ -115,3 +115,17 @@ def RollBackNPeriod(report_date,n_period):
         elif Date[-4:]=='0331':
             Date = str(int(Date[0:4])-1)+'1231'
     return Date
+
+# 在一个日期区间中可能发布的财务报告的报告期
+def ReportDateAvailable(start_date, end_date):
+    def _(date):
+        if '0101' <= date[4:] <= '0430':
+            return str(int(date[:4]) - 1)+'1231'
+        elif '0701' <= date[4:] <= '0830':
+            return date[:4] + '0630'
+        elif '1001' <= date[:4] <= '1030':
+            return date[:4] + '0930'
+        else:
+            return date
+    report_dates = pd.date_range(_(start_date), _(end_date), freq='Q')
+    return report_dates.strftime("%Y%m%d")

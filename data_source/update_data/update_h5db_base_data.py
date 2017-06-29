@@ -92,6 +92,7 @@ def updateSectorConstituent(dates, windcode):
     return d
 
 def updateSectorConstituent2(dates, sectorid, column_mark):
+    """更新某一个板块的成分股"""
     l = []
     for date in dates:
         d = w.wset("sectorconstituent","date={date};sectorid={sectorid}".format(
@@ -187,7 +188,7 @@ def update_financial_data(start, end):
     net_profit_ttm.columns = ['net_profit_last_ttm']
     h5.save_factor(net_profit_ttm, '/stock_financial_data/')
     
-    # 净利润最近年报
+    # 净利润最近年报1
     net_profit_last_year = icmsheet.last_year(['net_profit_excl_min_int_inc'], dates)
     net_profit_last_year.columns = ['net_profit_last_year']
     h5.save_factor(net_profit_last_year, '/stock_financial_data/')
@@ -204,6 +205,7 @@ def update_financial_data(start, end):
     
 UpdateFuncs = [update_trade_status, update_financial_data]
 
-# UpdateFuncs = [update_sw_level_1]
-for iFunc in UpdateFuncs:
-    iFunc('20170602', '20170620')
+if __name__ == '__main__':
+    # UpdateFuncs = [update_sw_level_1]
+    for iFunc in UpdateFuncs:
+        iFunc('20170602', '20170620')
