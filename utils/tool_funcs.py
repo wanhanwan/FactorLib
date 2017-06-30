@@ -123,9 +123,16 @@ def ReportDateAvailable(start_date, end_date):
             return str(int(date[:4]) - 1)+'1231'
         elif '0701' <= date[4:] <= '0830':
             return date[:4] + '0630'
-        elif '1001' <= date[:4] <= '1030':
+        elif '1001' <= date[4:] <= '1030':
             return date[:4] + '0930'
         else:
             return date
     report_dates = pd.date_range(_(start_date), _(end_date), freq='Q')
     return report_dates.strftime("%Y%m%d")
+
+# 对财务数据进行重新索引
+def financial_data_reindex(data, idx):
+    idx2 = idx.reset_index(level=1)
+    idx2.index = pd.DatetimeIndex(idx2.index)
+    new_data = idx2.join(data, on=['max_report_date', 'IDs'])
+    return new_data.set_index('IDs', append=True)

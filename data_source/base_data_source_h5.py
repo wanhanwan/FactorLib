@@ -1,9 +1,10 @@
 import pandas as pd
 
 from const import SW_INDUSTRY_DICT,CS_INDUSTRY_DICT,MARKET_INDEX_DICT
-from utils.tool_funcs import parse_industry, get_industry_names
-from utils.datetime_func import DateStr2Datetime
+from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex
+from utils.datetime_func import DateStr2Datetime, Datetime2DateStr
 from datetime import timedelta
+
 
 class base_data_source(object):
     def __init__(self, sector):
@@ -143,7 +144,8 @@ class base_data_source(object):
             idx.names = ['date','IDs']
             return trade_status.reindex(idx, fill_value=0)
 
-    def get_latest_report(self, field, ids=None, dates=None, start_date=None, end_date=None, freq='1d'):
+    def get_latest_report(self, field, ids=None, dates=None, start_date=None,
+                          end_date=None, freq='1d', report_type=None):
         """获得最近报告期的财务数据"""
         if dates is None:
             dates = self.trade_calendar.get_trade_days(start_date=start_date,end_date=end_date,freq=freq)
@@ -154,7 +156,64 @@ class base_data_source(object):
         if (end_date not in dates) and (end_date is not None):
             dates.append(end_date)
         dates.sort()
-
+        idx = self.get_latest_report_date(dates, report_type)
+        raw_data = self.h5DB.load_factor(field, '/stock_financial_data/', ids=ids)
+        return financial_data_reindex(raw_data, idx)
+    
+    def get_nlatest_reports(self, field, n, ids=None, dates=None, start_date=None,
+                            end_date=None, freq='1d', report_type=None):
+        """获得最近N期财务数据"""
+        if dates is None:
+            dates = self.trade_calendar.get_trade_days(start_date=start_date,end_date=end_date,freq=freq)
+        elif not isinstance(dates,list):
+            dates = [dates]
+        if (start_date not in dates) and (start_date is not None):
+            dates.append(start_date)
+        if (end_date not in dates) and (end_date is not None):
+            dates.append(end_date)
+        dates.sort()
+        idx = self.get_nlatest_report_dates(dates, n, report_type)
+        raw_data = self.h5DB.load_factor(field, '/stock_financial_data/', ids=ids)
+        return financial_data_reindex(raw_data, idx)
+    
+    def get_nlatest_report_dates(self, dates, n, report_type=None):
+        """特定日期序列的前n个最大报告期"""
+        ann_report_dates = self.get_report_ann_dt(report_type)
+        _ = []
+        if isinstance(dates, str):
+            dates = [dates]
+        for date in dates:
+            temp = ann_report_dates[ann_report_dates['ann_dt']<=date]
+            max_date = temp.groupby('IDs')['date'].nlargest(n).reset_index(level=1, drop=True)
+            max_date.index = pd.MultiIndex.from_product([[date], max_date.index], names=['date', 'IDs'])
+            _.append(max_date)
+        return pd.concat(_).rename('max_report_date').to_frame()
+    
+    def get_latest_report_date(self, dates, report_type=None):
+        """特定日期序列的最大报告期"""
+        ann_report_dates = self.get_report_ann_dt(report_type)
+        _ = []
+        if isinstance(dates, str):
+            dates = [dates]
+        for date in dates:
+            temp = ann_report_dates[ann_report_dates['ann_dt']<=date]
+            max_date = temp.groupby('IDs')['date'].max()
+            max_date.index = pd.MultiIndex.from_product([[date], max_date.index], names=['date', 'IDs'])
+            _.append(max_date)
+        return pd.concat(_).rename('max_report_date').to_frame()
+    
+    def get_report_ann_dt(self, report_type):
+        ann_report_dates = self.h5DB.load_factor('ann_dt', '/stock_financial_data/').reset_index(level=0)
+        if report_type is None:
+            return ann_report_dates
+        elif report_type == 'Q1':
+            return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 3]
+        elif report_type == 'Q2':
+            return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 6]
+        elif report_type == 'Q3':
+            return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 9]
+        else:
+            return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 12]
 
 
 class sector(object):
