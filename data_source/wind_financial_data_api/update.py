@@ -7,12 +7,16 @@ import pandas as pd
 w.start()
 
 
-def update_data(field, start, end):
+def update_data(field, start, end, params=None):
     stocks = get_ashare(end)
     report_dates = ReportDateAvailable(start, end)
     _ = []
+    if params is not None:
+        param = params + ";Period=Q;Days=Alldays"
+    else:
+        param = "Period=Q;Days=Alldays"
     for date in report_dates:
-        d = w.wsd(stocks, field, date, date, "Period=Q;Days=Alldays")
+        d = w.wsd(stocks, field, date, date, param)
         data = d.Data[0]
         _.append(data)
     tradecodes = [windcode_to_tradecode(x) for x in stocks]
@@ -42,5 +46,7 @@ def update_report_ann_dt(start, end):
 
 if __name__ == '__main__':
     # update_report_ann_dt('20050101','20070101')
-    update_data('or_ttm2', '20061001', '20070101')
-    update_data('roe_ttm2', '20050101', '20070101')
+    # update_data('or_ttm2', '20061001', '20070101')
+    # update_data('roe_ttm2', '20050101', '20070101')
+    update_data('netprofit_ttm2', '20050101', '20170601', None)
+    

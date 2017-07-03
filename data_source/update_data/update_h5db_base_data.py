@@ -5,12 +5,11 @@ from datetime import datetime
 from functools import lru_cache
 from WindPy import *
 
-from utils.tool_funcs import get_industry_code
+from utils.tool_funcs import get_industry_code, ReportDateAvailable, windcode_to_tradecode
 from utils.datetime_func import DateStr2Datetime
-from data_source import h5, sec
+from data_source import h5, sec, save_factor
 from data_source.wind_plugin import get_history_bar
 from data_source.data_api import get_trade_days, trade_day_offset
-from data_source.financial_data_source import BalanceSheet, IncomeSheet
 from data_source.update_data import index_members, sector_members, index_weights, industry_classes
 
 w.start()
@@ -173,40 +172,15 @@ def update_trade_status(start, end):
 
     h5.save_factor(trade_status, '/trade_status/')
 
-def update_financial_data(start, end):
-    dates = get_trade_days(start, end)
-    icmsheet = IncomeSheet()
-    balcsheet = BalanceSheet()
-    
-    # 净资产
-    net_assets = balcsheet.last_quater(['tot_shrhldr_eqy_excl_min_int'], dates)
-    net_assets.columns = ['net_asset_last_quater']
-    h5.save_factor(net_assets, '/stock_financial_data/')
-    
-    # 净利润ttm
-    net_profit_ttm = icmsheet.last_ttm(['net_profit_excl_min_int_inc'], dates)
-    net_profit_ttm.columns = ['net_profit_last_ttm']
-    h5.save_factor(net_profit_ttm, '/stock_financial_data/')
-    
-    # 净利润最近年报1
-    net_profit_last_year = icmsheet.last_year(['net_profit_excl_min_int_inc'], dates)
-    net_profit_last_year.columns = ['net_profit_last_year']
-    h5.save_factor(net_profit_last_year, '/stock_financial_data/')
-    
-    # 主营业务收入ttm
-    oper_rev_ttm = icmsheet.last_ttm(['oper_rev'], dates)
-    oper_rev_ttm.columns = ['oper_rev_last_ttm']
-    h5.save_factor(oper_rev_ttm, '/stock_financial_data/')
-    
-    # 主营业务收入回溯一期
-    oper_rev_ttm_back_1P = icmsheet.last_ttm_back_nperiod(['oper_rev'], 1, dates)
-    oper_rev_ttm_back_1P.columns = ['oper_rev_last_ttm_back_1P']
-    h5.save_factor(oper_rev_ttm_back_1P, '/stock_financial_data/')
-
 def update_financial_data_api(start, end):
-    fields = ['roe_ttm2']
-    for field in fields:
-        _update_data(field, start, end)
+    fields = {'roe_ttm2': None,
+              'eqy_belongto_parcomsh': "unit=1;rptType=1",
+              'netprofit_ttm2': None,
+              'np_belongto_parcomsh': "unit=1;rptType=1",
+              'or_ttm2': None             
+              }
+    for field, params in fields.items():
+        _update_data(field, start, end, params)
 
 def update_report_ann_dt(start, end):
     """更新报告期和公告期"""
@@ -226,12 +200,16 @@ def update_report_ann_dt(start, end):
     save_factor(report_ann_dates, '/stocks/')
     return
 
-def _update_data(field, start, end):
+def _update_data(field, start, end, params=None):
     stocks = get_ashare(end)
     report_dates = ReportDateAvailable(start, end)
     _ = []
+    if params is not None:
+        param = params + ";Period=Q;Days=Alldays"
+    else:
+        param = "Period=Q;Days=Alldays"
     for date in report_dates:
-        d = w.wsd(stocks, field, date, date, "Period=Q;Days=Alldays")
+        d = w.wsd(stocks, field, date, date, param)
         data = d.Data[0]
         _.append(data)
     tradecodes = [windcode_to_tradecode(x) for x in stocks]
@@ -241,10 +219,13 @@ def _update_data(field, start, end):
     save_factor(data, '/stock_financial_data/')
 
 
-UpdateFuncs = [update_trade_status, update_financial_data, update_financial_data_api]
 
 
 if __name__ == '__main__':
-    # UpdateFuncs = [update_sw_level_1]
+    UpdateFuncs = [#onlist, update_price, update_sector,
+                   #update_trade_status, update_idx_weight,
+                #    update_industry_name,
+                   update_report_ann_dt,
+                   update_financial_data_api]
     for iFunc in UpdateFuncs:
-        iFunc('20170602', '20170620')
+        iFunc('20170620', '20170630')

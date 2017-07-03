@@ -4,6 +4,7 @@ import QuantLib as qlib
 from itertools import product
 from WindPy import *
 
+
 def _get_rebalance_dates(dates):
     '''
         calculate rebalance dates for the given dates
@@ -23,6 +24,7 @@ def _get_rebalance_dates(dates):
     rebalabce_dates = [str(x) + '0630' for x in range(year_start, year_end + 1)]
     return rebalabce_dates
 
+
 def _load_stock_returns(start_date, end_date, **kwargs):
     '''
         load daily returns of all stocks within time range between start_date
@@ -32,6 +34,7 @@ def _load_stock_returns(start_date, end_date, **kwargs):
     all_dates = kwargs['data_source'].trade_calendar.get_trade_days(start_date, end_date)
     daily_returns = kwargs['data_source'].load_factor('daily_returns', '/stocks/', dates = all_dates)
     return daily_returns.reset_index()
+
 
 def _load_pb(start_date, end_date, **kwargs):
     '''
@@ -196,6 +199,7 @@ def _get_rf(all_days, **kwargs):
     rf_data = rf_data.apply(lambda x: (1 + x / 100) ** (1 / 365) - 1)
     w.stop()
     return rf_data
+
 
 def fama_french(start_date, end_date, **kwargs):
     all_days = kwargs['data_source'].trade_calendar.get_trade_days(start_date, end_date)

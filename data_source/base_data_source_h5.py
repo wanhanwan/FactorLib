@@ -156,7 +156,7 @@ class base_data_source(object):
         if (end_date not in dates) and (end_date is not None):
             dates.append(end_date)
         dates.sort()
-        idx = self.get_latest_report_date(dates, report_type)
+        idx = self.get_latest_report_date(dates, report_type).loc[(slice(None), slice(ids)), :]
         raw_data = self.h5DB.load_factor(field, '/stock_financial_data/', ids=ids)
         return financial_data_reindex(raw_data, idx)
     
@@ -329,12 +329,14 @@ class sector(object):
             'backdoordate', '/stocks/').reset_index(level=0, drop=True)   # 借壳上市日期
         ashare_info = pd.merge(ashare, ashare_onlist_date, left_index=True, right_index=True, how='left')
         ashare_info = ashare_info.join(ashare_backdoordate).reset_index()
-        def f():
+        ashare_info['backdoordate'] = ashare_info['backdoordate'].fillna('21000101')
+
+        def f(x):
             if x['date'] >= DateStr2Datetime(x['backdoordate']):
                 return x['backdoordate']
             else:
                 return x['list_date']
-        ashare_info['list_date'] = ashare_info.apply(f, axis=1)
+        ashare_info['new_listdate'] = ashare_info.apply(f, axis=1)
         onlist_period = ashare_info['date'] - ashare_info['new_listdate'].apply(DateStr2Datetime)
         temp_ind = (onlist_period / timedelta(1)) > months_filter * 30
         return ashare_info.set_index(['date', 'IDs']).loc[temp_ind.values, ['list_date']].copy()

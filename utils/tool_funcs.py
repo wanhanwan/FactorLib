@@ -78,7 +78,7 @@ def get_industry_names(industry_symbol, industry_info):
 
 def get_industry_code(industry_symbol, industry_info):
     if industry_symbol in ['sw_level_2', 'cs_level_2']:
-        level_2_excel = os.path.abspath(os.path.abspath("..") +'/..') + os.sep + "resource" + os.sep + "level_2_industry_dict.xlsx"
+        level_2_excel = "D:/FactorLib" + os.sep + "resource" + os.sep + "level_2_industry_dict.xlsx"
         level_2_dict = pd.read_excel(level_2_excel, sheetname=industry_symbol, header=0)
     industry_info.columns = ['industry_code']
     if industry_symbol == 'cs_level_2':

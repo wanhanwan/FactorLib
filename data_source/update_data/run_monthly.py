@@ -1,7 +1,7 @@
 from data_source import data_source
 
-start = '20070101'
-end = '20170602'
+start = '20170601'
+end = '20170701'
 
 #更新价值类因子数据
 from value_factor import ValueFuncListMonthly
