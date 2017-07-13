@@ -121,36 +121,36 @@ ValueBiasFactor_SP_DR = ('ValueBiasFactor_SP_DR', '/XYData/Others/', 1)
 ValueBiasFactor_BP_DR = ('ValueBiasFactor_BP_DR', '/XYData/Others/', 1)
 VWAPPFactor_VWAPP_OLS = ('VWAPPFactor_VWAPP_OLS', '/XYData/Others/', 1)
 
-# factor_list_growth = [StyleGrowthFactor_Earnings_LTG, StyleGrowthFactor_Earnings_SFG, StyleGrowthFactor_Earnings_SQ_YoY,
-#                StyleGrowthFactor_SaleEarnings_SQ_YoY, StyleGrowthFactor_Sales_LTG, StyleGrowthFactor_Sales_SFG,
-#                StyleGrowthFactor_Sales_SQ_YoY]
+factor_list_growth = [StyleGrowthFactor_Earnings_LTG, StyleGrowthFactor_Earnings_SFG, StyleGrowthFactor_Earnings_SQ_YoY,
+               StyleGrowthFactor_SaleEarnings_SQ_YoY, StyleGrowthFactor_Sales_LTG, StyleGrowthFactor_Sales_SFG,
+               StyleGrowthFactor_Sales_SQ_YoY]
 
-# factor_list_quality = [StyleQualityFactor_AssetTurnover, StyleQualityFactor_CurrentRatio,
-#                StyleQualityFactor_Debt2Equity_LR, StyleQualityFactor_GrossMargin_TTM,
-#                StyleQualityFactor_OperatingCashFlows2OperatingProfits_TTM,
-#                StyleQualityFactor_OperatingProfitMargin_TTM, StyleQualityFactor_ROA_TTM,
-#                StyleQualityFactor_ROE_TTM, StyleQualityFactor_ThreeCosts2Sales_TTM]
+factor_list_quality = [StyleQualityFactor_AssetTurnover, StyleQualityFactor_CurrentRatio,
+               StyleQualityFactor_Debt2Equity_LR, StyleQualityFactor_GrossMargin_TTM,
+               StyleQualityFactor_OperatingCashFlows2OperatingProfits_TTM,
+               StyleQualityFactor_OperatingProfitMargin_TTM, StyleQualityFactor_ROA_TTM,
+               StyleQualityFactor_ROE_TTM, StyleQualityFactor_ThreeCosts2Sales_TTM]
 
-# factor_list = [StyleSentimentFactor_EPSChange_FY0_1M, StyleSentimentFactor_EPSChange_FY0_3M,
-#                StyleSentimentFactor_RatingChange_1M, StyleSentimentFactor_RatingChange_3M,
-#                StyleSentimentFactor_SalesChange_FY0_1M, StyleSentimentFactor_SalesChange_FY0_3M,
-#                StyleSentimentFactor_TargetReturn]
+factor_list_sentiment = [StyleSentimentFactor_EPSChange_FY0_1M, StyleSentimentFactor_EPSChange_FY0_3M,
+               StyleSentimentFactor_RatingChange_1M, StyleSentimentFactor_RatingChange_3M,
+               StyleSentimentFactor_SalesChange_FY0_1M, StyleSentimentFactor_SalesChange_FY0_3M,
+               StyleSentimentFactor_TargetReturn]
 
-# factor_list = [StyleTechnicalFactor_AmountAvg_1M, StyleTechnicalFactor_ILLIQ_20DAvg, StyleTechnicalFactor_LnFloatCap,
-#                StyleTechnicalFactor_RealizedVolatility_1Y, StyleTechnicalFactor_SmallTradeFlow,
-#                StyleTechnicalFactor_TSKEW_20D, StyleTechnicalFactor_TurnoverAvg_1M, StyleTechnicalFactor_Volume20D_240D,
-#                StyleTechnicalFactor_VolumeCV_20D]
+factor_list_technical = [StyleTechnicalFactor_AmountAvg_1M, StyleTechnicalFactor_ILLIQ_20DAvg, StyleTechnicalFactor_LnFloatCap,
+               StyleTechnicalFactor_RealizedVolatility_1Y,StyleTechnicalFactor_TSKEW_20D, StyleTechnicalFactor_TurnoverAvg_1M,
+               StyleTechnicalFactor_Volume20D_240D,StyleTechnicalFactor_VolumeCV_20D]
 
-# factor_list = [StyleValueFactor_BP_LR, StyleValueFactor_CFP_TTM,
-#                StyleValueFactor_EP_Fwd12M, StyleValueFactor_EP_LYR,
-#                StyleValueFactor_EP_SQ, StyleValueFactor_EP_TTM,
-#                StyleValueFactor_Sales2EV, StyleValueFactor_SP_TTM]
+factor_list_value = [StyleValueFactor_BP_LR, StyleValueFactor_CFP_TTM,
+               StyleValueFactor_EP_Fwd12M, StyleValueFactor_EP_LYR,
+               StyleValueFactor_EP_SQ, StyleValueFactor_EP_TTM,
+               StyleValueFactor_Sales2EV, StyleValueFactor_SP_TTM]
 
-# factor_list = [StyleMomentumFactor_LotteryMomentum_1M, StyleMomentumFactor_Momentum_1M,
-#                StyleMomentumFactor_Momentum_3M, StyleMomentumFactor_Momentum_60M]
+factor_list_momentum = [StyleMomentumFactor_LotteryMomentum_1M, StyleMomentumFactor_Momentum_1M,
+               StyleMomentumFactor_Momentum_3M, StyleMomentumFactor_Momentum_60M]
 
-# factor_list = [StyleFactor_GM, StyleFactor_GrowthFactor, StyleFactor_MomentumFactor, StyleFactor_SentimentFactor,
-#                StyleFactor_TB_adjM, StyleFactor_TradingBehaviorFactor, StyleFactor_ValueFactor,StyleFactor_VG,
-#                StyleFactor_VGS, StyleFactor_VGS_TB, StyleFactor_VGS_TBadjM, StyleFactor_VS]
+factor_list_style = [StyleFactor_GM, StyleFactor_GrowthFactor, StyleFactor_MomentumFactor, StyleFactor_SentimentFactor,
+               StyleFactor_TB_adjM, StyleFactor_TradingBehaviorFactor, StyleFactor_ValueFactor,StyleFactor_VG,
+               StyleFactor_VGS, StyleFactor_VGS_TB, StyleFactor_VGS_TBadjM, StyleFactor_VS]
 
-factor_list = [turnover_adjust_total_mkt_value, six_month_highest_returns]
+factor_list = factor_list_growth + factor_list_momentum + factor_list_quality + factor_list_sentiment + \
+    factor_list_style + factor_list_technical + factor_list_value

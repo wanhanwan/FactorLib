@@ -1,7 +1,7 @@
 # wind插件API
 from WindPy import *
-from data_source import data_api
-from utils.tool_funcs import tradecode_to_windcode, windcode_to_tradecode
+from data_source import data_api, h5
+from utils.tool_funcs import tradecode_to_windcode, windcode_to_tradecode, drop_patch
 from const import MARKET_INDEX_WINDCODE
 import pandas as pd
 import xlrd
@@ -15,7 +15,7 @@ argInfo = pd.read_excel(argInfoWB,sheetname='ArgInfo',engine='xlrd')
 
 w.start()
 # 行情数据接口
-def get_history_bar(field_names, start_date, end_date,id_type='stock', **kwargs):
+def get_history_bar(field_names, start_date, end_date, id_type='stock', **kwargs):
     if not isinstance(field_names,list):
         field_names = [field_names]
 
@@ -70,7 +70,7 @@ def _parse_args(args,**kwargs):
 
 def _bar_to_dataframe(data):
     """把windAPI数据转换成dataframe"""
-    ids = list(map(windcode_to_tradecode, data.Codes))
+    ids = list(map(drop_patch, data.Codes))
     dates = [x.date() for x in data.Times]
     col = pd.Index(ids, name='IDs')
     if len(dates) == 1:
@@ -82,4 +82,42 @@ def _bar_to_dataframe(data):
     df = df.stack().to_frame().sort_index().rename(columns={0:data.Fields[0].lower()})
     return df
 
+
+def _params2dict(params):
+    _d = {}
+    if params:
+        for key_value in params.split(";"):
+            key, value = key_value.split("=")
+            _d[key] = value
+    return _d
+
+def _param2str(param_dict):
+    _s = []
+    for k, v in param_dict.items():
+        _s.append("%s=%s"%(k, v))
+    return ";".join(_s)
+
+def _adjust_params(params, kwargs):
+    p_dict = _params2dict(params)
+    p_dict.update(kwargs)
+    return _param2str(p_dict)
+
+def _load_wsd_data(ids, fields, start, end, **kwargs):
+    if isinstance(fields, str):
+        fields = [fields]
+    params = _adjust_params("", kwargs)
+    ids = ",".join(ids)
+    _l = []
+    for field in fields:
+        d = w.wsd(ids, field, start, end, params)
+        _l.append(_bar_to_dataframe(d))
+    data = pd.concat(_l, axis=1)
+    return data
+
+if __name__ == '__main__':
+    from const import CS_INDUSTRY_DICT
+    codes = [x+'.WI' for x in CS_INDUSTRY_DICT]
+    pct_change = _load_wsd_data(codes, 'pct_chg', '20110101', '20170709')
+    pct_change.columns=['changeper']
+    h5.save_factor(pct_change, '/indexprices/cs_level_1/')
 

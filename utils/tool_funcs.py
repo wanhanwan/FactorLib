@@ -43,6 +43,9 @@ def tradecode_to_windcode(tradecode):
 def windcode_to_tradecode(windcode):
     return windcode[:6]
 
+def drop_patch(code):
+    return code.split(".")[0]
+
 def import_mod(mod_name):
     try:
         from importlib import import_module

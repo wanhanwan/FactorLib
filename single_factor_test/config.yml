@@ -1,17 +1,17 @@
 # 为单因子测试添加设置文件
 
 # 回测开始日期
-start_date : '20070201'
+start_date : '20140201'
 # 回测终止日期
-end_date : '20170530'
+end_date : '20170629'
 # 待测试因子列表文件
 factor_list_file : 'D:/FactorLib/single_factor_test/selfDefinedFactors.py'
 # 因子测试股票池,默认是全A. 其他待选项见const.py文件中MARKET_INDEX_DICT变量
-universe : '国企改革概念'
+universe : '101001'
 # 因子换仓频率
 freq : '1m'
 # 对比基准,默认为中证500
-benchmark : '000905'
+benchmark : '101001'
 
 mod :
     # 处理缺失值
@@ -52,7 +52,7 @@ mod :
         lib : 'factor_data_process.generate_stocklist'
         func : ['typical']
         kwargs:
-            industry_neutral : true
+            industry_neutral : false
             industry_name : '中信一级'
             prc : 0.05
 extra :

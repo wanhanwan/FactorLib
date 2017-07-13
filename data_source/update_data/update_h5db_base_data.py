@@ -222,10 +222,10 @@ def _update_data(field, start, end, params=None):
 
 
 if __name__ == '__main__':
-    UpdateFuncs = [#onlist, update_price, update_sector,
-                   #update_trade_status, update_idx_weight,
-                #    update_industry_name,
+    UpdateFuncs = [onlist, update_price, update_sector,
+                   update_trade_status, update_idx_weight,
+                   update_industry_name,
                    update_report_ann_dt,
                    update_financial_data_api]
     for iFunc in UpdateFuncs:
-        iFunc('20170620', '20170630')
+        iFunc('20170701', '20170707')

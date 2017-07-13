@@ -1,8 +1,8 @@
 
 from data_source import data_source
 
-start = '20170601'
-end = '20170630'
+start = '20170701'
+end = '20170709'
 
 #更新价值类因子数据
 from value_factor import ValueFuncListDaily

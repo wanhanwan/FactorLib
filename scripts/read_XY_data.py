@@ -5,14 +5,17 @@
 from data_source import h5
 import pandas as pd
 import os
+root = 'D:/data/XYData20170630/XYData'
+dirs = [x for x in os.listdir(root) if x not in ['基础数据','Growth','Momentum','Others', 'Quality']]
+for d in dirs:
+    print(d)
+    xy_path = root + '/' + d + '/'
 
-xy_path = "D:/data/XYData/others"
-
-# 读取数据
-all_files=os.listdir(xy_path)
-for file in all_files:
-    data = pd.read_csv(os.path.join(xy_path, file), header=0, index_col=0, parse_dates=True)
-    data.columns = data.columns.str[:6]
-    data = data.stack().to_frame().rename_axis(['date', 'IDs']). \
-        rename_axis({0: file[:-4].replace('-', '_')}, axis=1)
-    h5.save_factor(data, xy_path[7:])
+    # 读取数据
+    all_files=os.listdir(xy_path)
+    for file in all_files:
+        data = pd.read_csv(os.path.join(xy_path, file), header=0, index_col=0, parse_dates=True)
+        data.columns = data.columns.str[:6]
+        data = data.stack().to_frame().rename_axis(['date', 'IDs']). \
+            rename_axis({0: file[:-4].replace('-', '_')}, axis=1)
+        h5.save_factor(data, xy_path[22:])

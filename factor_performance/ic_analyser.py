@@ -35,9 +35,11 @@ class IC_Calculator(object):
             excess_dates_factor = env._factor_group_info_dates[dates>max_date]
             close_price_pre = env._data_source.get_history_price(None, dates=excess_dates_factor, adjust=True)
             close_price.index = close_price.index.set_levels(excess_dates_factor, level=0)
-            
-            stock_returns_2 = close_price / close_price_pre - 1
+
+            d = pd.concat([close_price, close_price_pre], axis=1)
+            stock_returns_2 = (d.iloc[:, 0] / d.iloc[:, 1] - 1).to_frame()
             stock_returns_2.columns = stock_returns.columns
+            stock_returns_2.index.names = ['date', 'IDs']
         else:
             stock_returns_2 = pd.DataFrame()
         self.stock_returns = stock_returns.append(stock_returns_2).sort_index()

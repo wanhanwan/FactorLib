@@ -10,5 +10,9 @@ snowball = ('xueqiu', '/stock_alternative/', -1)
 ths_click_ratio = ('ths_click_ratio', '/stock_alternative/', -1)
 
 
-factor_list = [bp_div_median, ep_div_median, float_mkt_value, six_month_highest_returns,
-               iffr, return_60d, turnover_adjust_total_mkt_value, snowball, ths_click_ratio]
+factor_list1 = [bp_div_median, ep_div_median, float_mkt_value, six_month_highest_returns,
+               iffr, return_60d, turnover_adjust_total_mkt_value]
+
+factor_list2 = [ths_click_ratio]
+
+factor_list = factor_list2

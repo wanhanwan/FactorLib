@@ -6,6 +6,7 @@ SW_INDUSTRY_DICT = {'801010':'农林牧渔','801020':'采掘','801030':'化工',
                     '801740':'国防军工','801750':'计算机','801760':'传媒','801770':'通信','801780':'银行','801790':'非银金融',
                     '801880':'汽车','801890':'机械设备'}
 SW_INDUSTRY_DICT_REVERSE = {SW_INDUSTRY_DICT[x]: x for x in SW_INDUSTRY_DICT}
+SW_INDUSTRY_CODES = [x+".WI" for x in SW_INDUSTRY_DICT]
 
 CS_INDUSTRY_DICT = {'CI005001':'石油石化','CI005002':'煤炭','CI005003':'有色金属','CI005004':'电力及公用事业','CI005005':'钢铁',
                     'CI005006':'基础化工','CI005007':'建筑','CI005008':'建材','CI005009':'轻工制造','CI005010':'机械',
@@ -14,9 +15,10 @@ CS_INDUSTRY_DICT = {'CI005001':'石油石化','CI005002':'煤炭','CI005003':'�
                     'CI005021':'银行','CI005022':'非银行金融','CI005023':'房地产','CI005024':'交通运输','CI005025':'电子元器件',
                     'CI005026':'通信','CI005027':'计算机','CI005028':'传媒','CI005029':'综合'}
 CS_INDUSTRY_DICT_REVERSE = {CS_INDUSTRY_DICT[x]: x for x in CS_INDUSTRY_DICT}
+CS_INDUSTRY_CODES = [x+".CI" for x in CS_INDUSTRY_DICT]
 
 MARKET_INDEX_DICT = {'000905':'中证500','000300':'沪深300','000906':'中证800','880011':'万得全A','000001':'上证综指',
-                     '399102':'创业板综', '000991': '中证全指医药','guoqigaige_index':'国企改革概念'}
+                     '399102':'创业板综', '000991': '中证全指医药','guoqigaige_index':'国企改革概念','101001':'非周期指数'}
 
 INDUSTRY_NAME_DICT = {'中信一级':'cs_level_1','申万一级':'sw_level_1', '中信二级': 'cs_level_2', '申万一级': 'sw_level_2'}
 
@@ -32,3 +34,9 @@ MARKET_INDEX_WINDCODE = {"中证500":"000905.SH",
                          }
 
 DATEMULTIPLIER = {'m':20,'w':5,'Y':252}
+
+
+# iFind接口相关
+THS_USERID = 'xyjj096'
+THS_PASSWORD = '1991822929'
+DEFAULT_PARAMS = "period:D,pricetype:6,rptcategory:0,fqdate:1900-01-01,hb:YSHB,fill:Previous"
