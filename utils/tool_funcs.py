@@ -139,3 +139,8 @@ def financial_data_reindex(data, idx):
     idx2.index = pd.DatetimeIndex(idx2.index)
     new_data = idx2.join(data, on=['max_report_date', 'IDs'])
     return new_data.set_index('IDs', append=True)
+
+# 某个时间区间内的所有报告期(季度)
+def get_all_report_periods(start, end):
+    periods = pd.date_range(start, end, freq='Q', name='date')
+    return periods
