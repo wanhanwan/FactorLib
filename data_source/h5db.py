@@ -8,6 +8,7 @@ from utils.datetime_func import Datetime2DateStr, DateStr2Datetime
 class H5DB(object):
     def __init__(self, data_path):
         self.data_path = data_path
+        self.feather_data_path = os.path.abspath(data_path+'/../feather')
         self.data_dict = None
         self._update_info()
     
@@ -136,6 +137,11 @@ class H5DB(object):
                 self._update_info()
                 raise KeyError("please make sure if_exists is valide")
         self._update_info()
+    
+    def to_feather(self, factor_name, factor_dir):
+        """将某一个因子转换成feather格式，便于跨平台使用"""
+        data = self.load_factor(factor_name, factor_dir).reset_index()
+        data.to_feather(self.feather_data_path+factor_dir+factor_name+'.feather')
     #-------------------------工具函数-------------------------------------------
     def abs_factor_path(self, factor_path, factor_name):
         return self.data_path + os.path.join(factor_path, factor_name+'.h5')
