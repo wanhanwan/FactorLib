@@ -1,9 +1,11 @@
 import pandas as pd
+import numpy as np
+import os
 
 from const import SW_INDUSTRY_DICT,CS_INDUSTRY_DICT,MARKET_INDEX_DICT
-from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex
+from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex, windcode_to_tradecode
 from utils.datetime_func import DateStr2Datetime, Datetime2DateStr
-from datetime import timedelta
+from datetime import timedelta, datetime
 
 
 class base_data_source(object):
@@ -11,6 +13,39 @@ class base_data_source(object):
         self.h5DB = sector.h5DB
         self.trade_calendar = sector.trade_calendar
         self.sector = sector
+        self._load_dividends()
+    
+    def _load_dividends(self):
+        def _save_convert(x):
+            if isinstance(x, str):
+                return datetime.strptime(x, "%Y-%m-%d")
+            else:
+                return x
+
+        def _earliest_date(x):
+            if 0 in x.values:
+                try:
+                    return _save_convert(x[x != 0].iloc[0])
+                except IndexError:
+                    return np.nan
+            else:
+                return x.apply(_save_convert).min()
+
+        dividend_csv_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+        dividend_csv_path = os.path.join(dividend_csv_path, 'resource/dividends.xlsx')
+        xr = pd.ExcelFile(dividend_csv_path)
+        l = []
+        for sheet_name in xr.sheet_names:
+            data = pd.read_excel(xr, sheetname=sheet_name, skiprows=3, header=1)[
+                ['Wind代码', '分红预披露公告日', '预案公告日', '每股股利', '分红总额']]
+            data['Wind代码'] = data['Wind代码'].apply(windcode_to_tradecode)
+            data['period'] = sheet_name
+            data['ann_dt'] = data[['分红预披露公告日', '预案公告日']].apply(_earliest_date, axis=1)
+            data['ann_dt'] = data['ann_dt'].fillna(datetime.strptime(sheet_name+'0430', '%Y%m%d'))
+            data = data.rename(columns={'Wind代码': 'IDs', '每股股利':'dividend_pershare', '分红总额':'total_dividend'})
+            l.append(data)
+        dividend_data = pd.concat(l)[['IDs','ann_dt','period','dividend_pershare','total_dividend']]
+        self.dividend = dividend_data
 
     def load_factor(self, symbol, factor_path, ids=None, dates=None, start_date=None, end_date=None, idx=None):
         if idx is None:
@@ -214,6 +249,21 @@ class base_data_source(object):
             return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 9]
         else:
             return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 12]
+    
+    def get_dividends(self, ids, dates):
+        """在指定截止日前的红利数据"""
+        dates = pd.DatetimeIndex(dates)
+        l = []
+        for date in dates:
+            d = self.dividend[self.dividend['ann_dt'] <= date].sort_values('ann_dt').groupby('IDs').last()
+            d['date'] = date
+            d = d.set_index(['date'], append=True).swaplevel()
+            l.append(d[['total_dividend']])
+        if ids is None:
+            return pd.concat(l)
+        else:
+            d = pd.concat(l)
+        return d[d.index.levels[1].isin(ids)]
 
 
 class sector(object):

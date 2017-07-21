@@ -3,12 +3,14 @@
 import pandas as pd
 import os
 import shutil
+from datetime import datetime
 from utils.datetime_func import Datetime2DateStr, DateStr2Datetime
 
 class H5DB(object):
     def __init__(self, data_path):
         self.data_path = data_path
         self.feather_data_path = os.path.abspath(data_path+'/../feather')
+        self.snapshots_path = os.path.abspath(data_path+'/../snapshots')
         self.data_dict = None
         self._update_info()
     
@@ -22,15 +24,12 @@ class H5DB(object):
                     update_factors(file_path, root=root+'%s/' % file)
                 else:
                     if file[-3:] == '.h5':
-                        panel = pd.read_hdf(file_path, file[:-3])
-                        min_date = Datetime2DateStr(panel.major_axis.min())
-                        max_date = Datetime2DateStr(panel.major_axis.max())
-                        factor_list.append([root, file[:-3], min_date, max_date])
+                        factor_list.append([root, file[:-3]])
                     else:
                         pass
         update_factors(self.data_path)
         self.data_dict = pd.DataFrame(
-            factor_list, columns=['path', 'name', 'min_date', 'max_date'])
+            factor_list, columns=['path', 'name'])
     
     def set_data_path(self, path):
         self.data_path = path
@@ -65,8 +64,10 @@ class H5DB(object):
     
     #因子的时间区间
     def get_date_range(self, factor_name, factor_path):
-        return tuple(self.data_dict.loc[(self.data_dict['path']==factor_path) &
-                              (self.data_dict['name']==factor_name), ['min_date', 'max_date']].stack())
+        panel = pd.read_hdf(self.abs_factor_path(factor_path, factor_name))
+        min_date = Datetime2DateStr(panel.major_axis.min())
+        max_date = Datetime2DateStr(panel.major_axis.max())
+        return min_date, max_date
 
     #--------------------------数据管理-------------------------------------------
 
@@ -142,6 +143,28 @@ class H5DB(object):
         """将某一个因子转换成feather格式，便于跨平台使用"""
         data = self.load_factor(factor_name, factor_dir).reset_index()
         data.to_feather(self.feather_data_path+factor_dir+factor_name+'.feather')
+
+    def snapshot(self, date=None):
+        """获取数据库快照并保存"""
+        self._update_info()
+        if date is None:
+            date_now = datetime.today().strftime("%Y%m%d")
+        if os.path.isdir(os.path.join(self.snapshots_path, date_now)):
+            shutil.rmtree(os.path.join(self.snapshots_path, date_now), True)
+        os.mkdir(os.path.join(self.snapshots_path, date_now))
+        target_path = os.path.join(self.snapshots_path, date_now)
+        for d in self.data_dict['path'].unique():
+            os.makedirs(target_path + d)
+        for idx, row in self.data_dict.iterrows():
+            file_path = self.abs_factor_path(row['path'], row['name'])
+            data = pd.read_hdf(file_path, row['name']).to_frame().reset_index()
+            if date is None:
+                snapshot = data[data['date'] == data['date'].max()]
+            else:
+                snapshot = data[data['date'] == DateStr2Datetime(date)]
+            snapshot.to_csv(target_path+row['path']+row['name']+'.csv', index=False)
+
+
     #-------------------------工具函数-------------------------------------------
     def abs_factor_path(self, factor_path, factor_name):
         return self.data_path + os.path.join(factor_path, factor_name+'.h5')
@@ -151,4 +174,3 @@ class H5DB(object):
         while os.path.isfile(self.abs_factor_path(factor_path, factor_name+str(i))):
             i += 1
         return factor_name + str(i)
-    

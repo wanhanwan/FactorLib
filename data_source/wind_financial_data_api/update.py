@@ -50,18 +50,22 @@ def update_report_ann_dt(start, end):
 
 
 if __name__ == '__main__':
-    from wind_api_const import WIND_API_FIELD
+    from wind_api_const import FINANCIAL_BASE_FIELD, FINANCIAL_DERIVATIVE_FIELD
+    start = '20170101'
+    end = '20170501'
+
     # 更新报告期、公告期
-    # update_report_ann_dt('20050101','20070101')
+    # update_report_ann_dt(start, end)
 
     # 三张表原始数据, 原始数据在参数中需要加上“unit=1;rptType=1”
-    # fields = [x for x in WIND_API_FIELD if x not in ['非经常性损益']]
-    # for x in fields:
+    # for x in FINANCIAL_BASE_FIELD:
     #     print(x)
-    #     update_data(WIND_API_FIELD[x], '20070101', '20170711',
-    #                 params = "unit=1;rptType=1", history=True)
+    #     update_data(FINANCIAL_BASE_FIELD[x], '20170101', end,
+    #                 params="unit=1;rptType=1", history=True)
 
-    # update_data(WIND_API_FIELD['经营活动产生的现金流量净额'], '20070101', '20170711', history=True, params='unit=1;rptType=1')
+    # update_data(FINANCIAL_BASE_FIELD['营业利润'], start, end, history=True, params='unit=1;rptType=1')
 
     # 财务衍生指标数据
-    update_data(WIND_API_FIELD['是否分红'], '20070101', '20170711', history=True)
+    for x in FINANCIAL_DERIVATIVE_FIELD:
+        print(x)
+        update_data(FINANCIAL_DERIVATIVE_FIELD[x], start, end, history=True)

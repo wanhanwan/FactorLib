@@ -34,9 +34,14 @@ class Environment(object):
         """初始化"""
         # 加载基准的收益率
         benchmark = self._config.benchmark
-        benchmark_return = self._data_source.get_fix_period_return(
-            benchmark,'1d', self._config.start_date, self._config.end_date,type='index').reset_index(level=1,drop=True)
-        self._benchmark_return = benchmark_return
+        if benchmark.startswith('101'):
+            benchmark_return = self._data_source.load_factor('daily_returns_%', '/indexprices/', ids=[benchmark],
+                                                             start_date=self._config.start_date, end_date=self._config.end_date)
+            self._benchmark_return = benchmark_return.reset_index(level=1, drop=True) / 100
+        else:
+            benchmark_return = self._data_source.get_fix_period_return(
+                benchmark,'1d', self._config.start_date, self._config.end_date,type='index').reset_index(level=1,drop=True)
+            self._benchmark_return = benchmark_return
 
         # 加载股票的日收益率
         stock_return = self._data_source.load_factor('daily_returns', '/stocks/', start_date=self._config.start_date,
