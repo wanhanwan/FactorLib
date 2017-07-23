@@ -26,54 +26,6 @@ def index_weight(index_id, date):
     weight = d.Data[3]
     return ids, weight
 
-def onlist(start, end):
-    """股票的上市日期"""
-    d = get_ashare(end)
-    idx = pd.MultiIndex.from_product([[DateStr2Datetime("19000101")],[x[:6] for x in d]],
-                                        names=['date', 'IDs'])
-    data = w.wsd(d, "ipo_date", end, end, "")
-    list_date = [x.strftime("%Y%m%d") for x in data.Data[0]]
-    list_date = pd.DataFrame(list_date, index=idx, columns=['list_date'])
-    data = w.wsd(d, "backdoordate", end, end, "")
-    backdoordate = [x.strftime("%Y%m%d") if x is not None else np.nan for x in data.Data[0]]
-    backdoordate = pd.DataFrame(backdoordate, index=idx, columns=['backdoordate'])
-    backdoordate.fillna('21000101', inplace=True)
-    h5.save_factor(list_date, '/stocks/')
-    h5.save_factor(backdoordate, '/stocks/')
-
-
-def update_price(start, end):
-    """更新价量行情数据"""
-    field_names = "收盘价 涨跌幅 最高价 最低价 成交量"
-    data = get_history_bar(field_names.split(),start,end,**{'复权方式':'不复权'})
-    data.columns = ['close','daily_returns_%','high','low','vol']
-    data['vol'] = data['vol'] / 100
-    data['daily_returns'] = data['daily_returns_%'] / 100
-    h5.save_factor(data,'/stocks/')
-
-    field_names = "总市值 A股市值(不含限售股)"
-    data = get_history_bar(field_names.split(),start,end)
-    data.columns = ['total_mkt_value','float_mkt_value']
-    data = data / 10000
-    h5.save_factor(data,'/stocks/')
-
-    field_names = "收盘价"
-    data = get_history_bar(field_names.split(),start,end,**{'复权方式':'后复权'})
-    data.columns = ['adj_close']
-    h5.save_factor(data,'/stocks/')
-
-    field_names = "换手率 换手率(基准.自由流通股本)"
-    data = get_history_bar(field_names.split(),start,end)
-    data.columns = ['turn','freeturn']
-    h5.save_factor(data,'/stock_liquidity/')
-
-    field_names = "开盘价 最高价 最低价 收盘价 成交量 成交额"
-    data = get_history_bar(field_names.split(),start,end,id_type='index')
-    data.columns = ['open','high','low','close','vol','amt']
-    data['amt'] = data['amt'] / 10000
-    data['vol'] = data['vol'] / 100
-    h5.save_factor(data,'/indexprices/')
-
 def updateSectorConstituent(dates, windcode):
     """更新某一个指数在时间序列上的成分股"""
     l = []
@@ -104,23 +56,13 @@ def updateSectorConstituent2(dates, sectorid, column_mark):
         l.append(d)
     d = pd.concat(l, ignore_index=True)
     d = d.set_index(['date','IDs']).sort_index()
-    return d    
+    return d
 
-def update_sector(start, end):
-    """更新成分股信息"""
-
-    all_dates = get_trade_days(start, end)
-    for index_id in index_members:
-        d = updateSectorConstituent(all_dates, index_id)
-        h5.save_factor(d, '/indexes/')
-    
-    for column_mark, sectorid in sector_members.items():
-        d = updateSectorConstituent2(all_dates, sectorid, column_mark)
-        if column_mark == 'ashare':
-            h5.save_factor(d, '/indexes/')
-        else:
-            h5.save_factor(d, '/stocks/')
-            
+def get_stock_industryname(stocks, date, industryid, industrytype):
+    data = w.wsd(stocks, industryid, date, date, "industryType=%s"%industrytype)
+    idx = pd.MultiIndex.from_product([[DateStr2Datetime(date)], [x[:6] for x in stocks]])
+    d = pd.Series(data.Data[0], index=idx)
+    return d
 
 def index_weight_panel(dates, index_id):
     months = (trade_day_offset(x, -1, '1m') for x in dates)
@@ -132,6 +74,75 @@ def index_weight_panel(dates, index_id):
     d = pd.concat(l).to_frame().rename(columns={0:'_%s_weight'%index_id[:6]})
     return d
 
+
+def onlist(start, end):
+    """股票的上市日期"""
+    d = get_ashare(end)
+    idx = pd.MultiIndex.from_product([[DateStr2Datetime("19000101")],[x[:6] for x in d]],
+                                        names=['date', 'IDs'])
+    data = w.wsd(d, "ipo_date", end, end, "")
+    list_date = [x.strftime("%Y%m%d") for x in data.Data[0]]
+    list_date = pd.DataFrame(list_date, index=idx, columns=['list_date'])
+    data = w.wsd(d, "backdoordate", end, end, "")
+    backdoordate = [x.strftime("%Y%m%d") if x is not None else np.nan for x in data.Data[0]]
+    backdoordate = pd.DataFrame(backdoordate, index=idx, columns=['backdoordate'])
+    backdoordate.fillna('21000101', inplace=True)
+    h5.save_factor(list_date, '/stocks/')
+    h5.save_factor(backdoordate, '/stocks/')
+
+
+def update_price(start, end):
+    """更新价量行情数据"""
+    # 股票价量数据
+    field_names = "收盘价 涨跌幅 最高价 最低价 成交量"
+    data = get_history_bar(field_names.split(),start,end,**{'复权方式':'不复权'})
+    data.columns = ['close','daily_returns_%','high','low','vol']
+    data['vol'] = data['vol'] / 100
+    data['daily_returns'] = data['daily_returns_%'] / 100
+    h5.save_factor(data,'/stocks/')
+
+    field_names = "总市值 A股市值(不含限售股)"
+    data = get_history_bar(field_names.split(),start,end)
+    data.columns = ['total_mkt_value','float_mkt_value']
+    data = data / 10000
+    h5.save_factor(data,'/stocks/')
+
+    # 股票后复权收盘价
+    field_names = "收盘价"
+    data = get_history_bar(field_names.split(),start,end,**{'复权方式':'后复权'})
+    data.columns = ['adj_close']
+    h5.save_factor(data,'/stocks/')
+
+    field_names = "换手率 换手率(基准.自由流通股本)"
+    data = get_history_bar(field_names.split(),start,end)
+    data.columns = ['turn','freeturn']
+    h5.save_factor(data,'/stock_liquidity/')
+
+    # 指数价量数据
+    field_names = "开盘价 最高价 最低价 收盘价 成交量 成交额 涨跌幅"
+    data = get_history_bar(field_names.split(),start,end,id_type='index')
+    data.columns = ['open','high','low','close','vol','amt', 'daily_returns_%']
+    data['amt'] = data['amt'] / 10000
+    data['vol'] = data['vol'] / 100
+    h5.save_factor(data,'/indexprices/')
+
+
+def update_sector(start, end):
+    """更新成分股信息"""
+
+    all_dates = get_trade_days(start, end)
+    for index_id in index_members:
+        d = updateSectorConstituent(all_dates, index_id)
+        h5.save_factor(d, '/indexes/')
+
+    for column_mark, sectorid in sector_members.items():
+        d = updateSectorConstituent2(all_dates, sectorid, column_mark)
+        if column_mark == 'ashare':
+            h5.save_factor(d, '/indexes/')
+        else:
+            h5.save_factor(d, '/stocks/')
+
+
 def update_idx_weight(start, end):
     """更新指数权重"""
     all_dates = get_trade_days(start, end)
@@ -139,11 +150,6 @@ def update_idx_weight(start, end):
         d = index_weight_panel(all_dates, index_id) / 100
         h5.save_factor(d, '/indexes/')
 
-def get_stock_industryname(stocks, date, industryid, industrytype):
-    data = w.wsd(stocks, industryid, date, date, "industryType=%s"%industrytype)
-    idx = pd.MultiIndex.from_product([[DateStr2Datetime(date)], [x[:6] for x in stocks]])
-    d = pd.Series(data.Data[0], index=idx)
-    return d
 
 def update_industry_name(start, end):
     all_dates = get_trade_days(start, end)
@@ -155,6 +161,7 @@ def update_industry_name(start, end):
         industry = pd.concat(l).to_frame().rename(columns={0:column})
         industry = get_industry_code(column, industry)
         h5.save_factor(industry, '/indexes/')
+
 
 def update_trade_status(start, end):
     dates = get_trade_days(start, end)
@@ -169,36 +176,8 @@ def update_trade_status(start, end):
     trade_status.fillna(0, inplace=True)
     trade_status.columns = ['st','suspend','uplimit','downlimit']
     trade_status['no_trading'] = trade_status.any(axis=1).astype('int32')
-
     h5.save_factor(trade_status, '/trade_status/')
 
-def update_financial_data_api(start, end):
-    fields = {'roe_ttm2': None,
-              'eqy_belongto_parcomsh': "unit=1;rptType=1",
-              'netprofit_ttm2': None,
-              'np_belongto_parcomsh': "unit=1;rptType=1",
-              'or_ttm2': None             
-              }
-    for field, params in fields.items():
-        _update_data(field, start, end, params)
-
-def update_report_ann_dt(start, end):
-    """更新报告期和公告期"""
-    stocks = get_ashare(end)
-    report_dates = ReportDateAvailable(start, end)
-    ann_dates = []
-    for date in report_dates:
-        d = w.wsd(stocks, "stm_issuingdate", date, date, "Period=Q;Days=Alldays")
-        iann_dates = d.Data[0]
-        iann_dates = [x.strftime("%Y%m%d") if x is not None else x for x in iann_dates]
-        ann_dates.append(iann_dates)
-    tradecodes = [windcode_to_tradecode(x) for x in stocks]
-    dates = pd.DatetimeIndex(report_dates, name='date')
-    report_ann_dates = pd.DataFrame(ann_dates, index=dates, columns=tradecodes)
-    report_ann_dates = report_ann_dates.stack().to_frame().rename(columns={0:'ann_dt'})
-    report_ann_dates.index.names = ['date', 'IDs']
-    save_factor(report_ann_dates, '/stocks/')
-    return
 
 def _update_data(field, start, end, params=None):
     stocks = get_ashare(end)
@@ -219,13 +198,18 @@ def _update_data(field, start, end, params=None):
     save_factor(data, '/stock_financial_data/')
 
 
-
-
 if __name__ == '__main__':
-    UpdateFuncs = [onlist, update_price, update_sector,
-                   update_trade_status, update_idx_weight,
-                   update_industry_name,
-                   update_report_ann_dt,
-                   update_financial_data_api]
-    for iFunc in UpdateFuncs:
-        iFunc('20170701', '20170707')
+    from data_source.wind_financial_data_api import update
+    start = '20170707'
+    end = '20170721'
+    # UpdateFuncs = [onlist,
+    #                update_price,
+    #                update_sector,
+    #                update_trade_status,
+    #                update_idx_weight,
+    #                update_industry_name
+    #                ]
+    # for iFunc in UpdateFuncs:
+    #     iFunc(start, end)
+    # update.update_all(start, end)
+    h5.snapshot(pd.date_range(start, end), 'base_factor', mail=True)

@@ -5,6 +5,8 @@ import os
 import shutil
 from datetime import datetime
 from utils.datetime_func import Datetime2DateStr, DateStr2Datetime
+from  filemanager import zip_dir, unzip_file
+
 
 class H5DB(object):
     def __init__(self, data_path):
@@ -144,11 +146,11 @@ class H5DB(object):
         data = self.load_factor(factor_name, factor_dir).reset_index()
         data.to_feather(self.feather_data_path+factor_dir+factor_name+'.feather')
 
-    def snapshot(self, date=None):
+    def snapshot(self, dates, zipname=None, mail=False):
         """获取数据库快照并保存"""
         self._update_info()
-        if date is None:
-            date_now = datetime.today().strftime("%Y%m%d")
+        dates = list(dates)
+        date_now = max(dates).strftime("%Y%m%d")
         if os.path.isdir(os.path.join(self.snapshots_path, date_now)):
             shutil.rmtree(os.path.join(self.snapshots_path, date_now), True)
         os.mkdir(os.path.join(self.snapshots_path, date_now))
@@ -158,11 +160,29 @@ class H5DB(object):
         for idx, row in self.data_dict.iterrows():
             file_path = self.abs_factor_path(row['path'], row['name'])
             data = pd.read_hdf(file_path, row['name']).to_frame().reset_index()
-            if date is None:
-                snapshot = data[data['date'] == data['date'].max()]
-            else:
-                snapshot = data[data['date'] == DateStr2Datetime(date)]
+            snapshot = data[data['date'].isin(dates)]
+            if snapshot.empty:
+                snapshot = data[data['date']==data['date'].max()]
             snapshot.to_csv(target_path+row['path']+row['name']+'.csv', index=False)
+        if zipname is not None:
+            zip_dir(target_path, os.path.join(self.snapshots_path, '%s_%s.zip'%(date_now, zipname)))
+        if mail:
+            from QuantLib import mymail
+            content = "hello everyone, this is factor data on %s"%date_now
+            attachment = os.path.join(self.snapshots_path, '%s_%s.zip'%(date_now, zipname))
+            mymail.send_mail("base factor data on %s"%date_now, content, {attachment})
+
+    def read_snapshot(self, name):
+        snapshotzip = self.snapshots_path+"/%s"%name
+        unzip_file(snapshotzip, self.snapshots_path)
+        snapshotdir = snapshotdir.replace('.zip','')
+        for dirpath, subdirs, filenames in os.walk(snapshotdir):
+            factor_dir = '/%s/'%os.path.relpath(dirpath, snapshotdir).replace('\\','/')
+            for file in filenames:
+                if file.endswith(".csv"):
+                    data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str})
+                    data['IDs'] = data['IDs'].str.zfill(6)
+                    self.save_factor(data.set_index(['date','IDs']), factor_dir)
 
 
     #-------------------------工具函数-------------------------------------------

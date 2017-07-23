@@ -49,19 +49,17 @@ def update_report_ann_dt(start, end):
     return
 
 
-if __name__ == '__main__':
-    from wind_api_const import FINANCIAL_BASE_FIELD, FINANCIAL_DERIVATIVE_FIELD
-    start = '20170101'
-    end = '20170501'
+def update_all(start, end):
+    from .wind_api_const import FINANCIAL_BASE_FIELD, FINANCIAL_DERIVATIVE_FIELD
 
     # 更新报告期、公告期
-    # update_report_ann_dt(start, end)
+    update_report_ann_dt(start, end)
 
     # 三张表原始数据, 原始数据在参数中需要加上“unit=1;rptType=1”
-    # for x in FINANCIAL_BASE_FIELD:
-    #     print(x)
-    #     update_data(FINANCIAL_BASE_FIELD[x], '20170101', end,
-    #                 params="unit=1;rptType=1", history=True)
+    for x in FINANCIAL_BASE_FIELD:
+        print(x)
+        update_data(FINANCIAL_BASE_FIELD[x], start, end,
+                    params="unit=1;rptType=1", history=True)
 
     # update_data(FINANCIAL_BASE_FIELD['营业利润'], start, end, history=True, params='unit=1;rptType=1')
 
@@ -69,3 +67,7 @@ if __name__ == '__main__':
     for x in FINANCIAL_DERIVATIVE_FIELD:
         print(x)
         update_data(FINANCIAL_DERIVATIVE_FIELD[x], start, end, history=True)
+
+
+if __name__ == '__main__':
+    update_all('20170101', '20170723')
