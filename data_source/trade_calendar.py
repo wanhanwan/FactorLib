@@ -2,11 +2,15 @@ import pandas as pd
 import os
 
 from utils.datetime_func import getWeekLastDay,getWeekFirstDay,getMonthFirstDay,getMonthLastDay, Datetime2DateStr
+from functools import lru_cache
+
 
 class trade_calendar(object):
     allTradeDays = pd.read_csv(
         os.sep.join(__file__.split(os.sep)[:-2])+os.sep+'resource/trade_dates.csv',
         index_col=0, header=None, squeeze=True, dtype='str').values.tolist()
+    allTradeDays_idx = pd.DatetimeIndex(allTradeDays)
+
 
     def get_trade_days(self, start_date=None,end_date=None,freq='1d',first_or_last='L'):
         """获得交易日期
@@ -57,13 +61,20 @@ class trade_calendar(object):
         else:
             return day in pd.DatetimeIndex(trade_calendar.allTradeDays)
 
-    def latest_trade_day(self, day, trade_days):
+    @lru_cache()
+    def latest_trade_day(self, day, trade_days=None):
         """
         计算在trade_days中距离day最近的一天
         :param day:
         :param trade_days: DatetimeIndex
         :return: latest_day
         """
+        if trade_days is None:
+            trade_days = self.allTradeDays_idx
         if day >= max(trade_days):
             return day
         return trade_days[trade_days >= day][0]
+
+    def get_latest_trade_days(self, days):
+        series = pd.Series(self.allTradeDays, index=self.allTradeDays).sort_index()
+        return series.reindex(days, method='ffill').tolist()

@@ -200,8 +200,9 @@ def _update_data(field, start, end, params=None):
 
 if __name__ == '__main__':
     from data_source.wind_financial_data_api import update
+    from run_daily import dailyfactors
     start = '20170707'
-    end = '20170721'
+    end = '20170724'
     # UpdateFuncs = [onlist,
     #                update_price,
     #                update_sector,
@@ -212,4 +213,5 @@ if __name__ == '__main__':
     # for iFunc in UpdateFuncs:
     #     iFunc(start, end)
     # update.update_all(start, end)
+    dailyfactors(start, end)
     h5.snapshot(pd.date_range(start, end), 'base_factor', mail=True)

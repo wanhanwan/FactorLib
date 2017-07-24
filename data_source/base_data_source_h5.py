@@ -263,7 +263,7 @@ class base_data_source(object):
             return pd.concat(l)
         else:
             d = pd.concat(l)
-        return d[d.index.levels[1].isin(ids)]
+        return d[d.index.get_level_values(1).isin(ids)]
 
 
 class sector(object):

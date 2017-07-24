@@ -174,13 +174,19 @@ class H5DB(object):
 
     def read_snapshot(self, name):
         snapshotzip = self.snapshots_path+"/%s"%name
-        unzip_file(snapshotzip, self.snapshots_path)
-        snapshotdir = snapshotdir.replace('.zip','')
+        unzip_file(snapshotzip, snapshotzip.replace('.zip',''))
+        snapshotdir = snapshotzip.replace('.zip','')
         for dirpath, subdirs, filenames in os.walk(snapshotdir):
             factor_dir = '/%s/'%os.path.relpath(dirpath, snapshotdir).replace('\\','/')
             for file in filenames:
+                print(file)
                 if file.endswith(".csv"):
-                    data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str})
+                    try:
+                        data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str}, parse_dates=['date'])
+                    except:
+                        data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str}, encoding="GBK", parse_dates=['date'])
+                    if data.columns.isin(['list_date', 'backdoordate']):
+                        data = data.astype('str')
                     data['IDs'] = data['IDs'].str.zfill(6)
                     self.save_factor(data.set_index(['date','IDs']), factor_dir)
 
