@@ -1,11 +1,13 @@
 from sqlalchemy import create_engine
 
-from .local_db import LocalDB
+# from .local_db import LocalDB
 from .h5db import H5DB
 from .trade_calendar import trade_calendar
 from .base_data_source_h5 import base_data_source, sector
+import pandas as pd
 
 h5 = H5DB("D:/data/h5")
+riskModelDB = H5DB("D:/data/risk_model")
 tc = trade_calendar()
 sec = sector(h5, tc)
 data_source = base_data_source(sec)
@@ -82,4 +84,4 @@ def _get_report_ann_dt(report_type):
     elif report_type == 'Q3':
         return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 9]
     else:
-        return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 12]   
+        return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 12]

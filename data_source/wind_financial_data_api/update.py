@@ -70,4 +70,5 @@ def update_all(start, end):
 
 
 if __name__ == '__main__':
-    update_all('20170101', '20170723')
+    # update_all('20170101', '20170723')
+    update_report_ann_dt('20170101', '20170723')
