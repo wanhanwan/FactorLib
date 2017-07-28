@@ -119,9 +119,9 @@ def save_summary_to_excel(factors, file_path, env, method='typical'):
     active_sheet = wb.active
     active_sheet.title = "IC"
     write_df_to_excel(active_sheet, (1, 1), ic_series)
-    active_sheet = wb.create_sheet("分位数多空组合")
-    write_df_to_excel(active_sheet, (1, 1), long_only)
     active_sheet = wb.create_sheet("分位数多头组合")
+    write_df_to_excel(active_sheet, (1, 1), long_only)
+    active_sheet = wb.create_sheet("分位数多空组合")
     write_df_to_excel(active_sheet, (1, 1), long_short)
     file_name = file_path + os.sep + 'summary.xlsx'
     wb.save(filename=file_name)

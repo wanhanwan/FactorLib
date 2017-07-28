@@ -16,9 +16,9 @@ def _rawstockpool(sectorid, dates):
     return stockpool
 
 
-def _stockpool(sectorid, dates, qualify):
+def _stockpool(sectorid, dates, qualify_method):
     raw = _rawstockpool(sectorid, dates)
-    return stockpool._qualify_stocks(raw, qualify)
+    return stockpool._qualify_stocks(raw, qualify_method)
 
 
 def _drop_outlier(factors, method):
