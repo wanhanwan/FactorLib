@@ -6,7 +6,7 @@ import QuantLib as qlib
 
 # 市值调整换手率
 def turnover_adjust_by_float_mv(start, end, **kwargs):
-    all_days = kwargs['data_source'].trade_calendar.get_trade_days(start, end, '1m')
+    all_days = kwargs['data_source'].trade_calendar.get_trade_days(start, end)
     float_mkt_value = kwargs['data_source'].load_factor("float_mkt_value", '/stocks/', dates=all_days)
     float_mkt_value['float_mkt_value'] = np.log(float_mkt_value['float_mkt_value'])
     turnover = kwargs['data_source'].load_factor("turn", '/stock_liquidity/', dates=all_days)
@@ -44,5 +44,10 @@ def _resid_ols(data):
     data.loc[notNanInd, 'resid'] = ols.resid
     return data[['resid']]
 
-LiquidityFuncListDaily = []
-LiquidityFuncListMonthly = [turnover_adjust_by_float_mv]
+LiquidityFuncListDaily = [turnover_adjust_by_float_mv]
+LiquidityFuncListMonthly = []
+
+
+if __name__ == '__main__':
+    from data_source import data_source
+    turnover_adjust_by_float_mv('20170701', '20170731', data_source=data_source)

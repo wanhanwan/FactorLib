@@ -409,12 +409,8 @@ class sector(object):
         ashare_info = ashare_info.join(ashare_backdoordate).reset_index()
         ashare_info['backdoordate'] = ashare_info['backdoordate'].fillna('21000101')
 
-        def f(x):
-            if x['date'] >= DateStr2Datetime(x['backdoordate']):
-                return x['backdoordate']
-            else:
-                return x['list_date']
-        ashare_info['new_listdate'] = ashare_info.apply(f, axis=1)
+        backdoordate = ashare_info['backdoordate'].apply(DateStr2Datetime)
+        ashare_info['new_listdate'] = np.where(ashare_info['date']>=backdoordate, ashare_info['backdoordate'], ashare_info['list_date'])
         onlist_period = ashare_info['date'] - ashare_info['new_listdate'].apply(DateStr2Datetime)
         temp_ind = (onlist_period / timedelta(1)) > months_filter * 30
         return ashare_info.set_index(['date', 'IDs']).loc[temp_ind.values, ['list_date']].copy()

@@ -3,7 +3,7 @@ from utils.datetime_func import DateStr2Datetime
 
 # 过去6个月高点下来的收益
 def six_month_return_from_high(start, end, **kwargs):
-    start_date_pricedata = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -10, '1m')
+    start_date_pricedata = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -150)
     dates = kwargs['data_source'].trade_calendar.get_trade_days(start_date_pricedata,end)
     close = kwargs['data_source'].load_factor("adj_close", '/stocks/', dates=dates)
     
@@ -18,5 +18,10 @@ def six_month_return_from_high(start, end, **kwargs):
     # 存储因子
     kwargs['data_source'].h5DB.save_factor(reverse, '/stock_reversal/')
 
-ReverseFuncListDaily = []
-ReverseFuncListMonthly = [six_month_return_from_high]
+ReverseFuncListDaily = [six_month_return_from_high]
+ReverseFuncListMonthly = []
+
+
+if __name__ == '__main__':
+    from data_source import data_source
+    six_month_return_from_high('20170701', '20170731', data_source=data_source)

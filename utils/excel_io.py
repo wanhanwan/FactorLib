@@ -135,5 +135,13 @@ def save_stock_list(factor, file_path, env):
         stock_list['IDs'] = stock_list['IDs'].apply(tradecode_to_windcode)
         file_name = "_".join([os.path.join(file_path,factor.name), 'stock_list', _m+'.csv'])
         stock_list.to_csv(file_name, index=False)
+
+
+def write_xlsx(name, **kwargs):
+    wb = Workbook()
+    for sheet in kwargs:
+        activesheet = wb.create_sheet(sheet)
+        write_df_to_excel(activesheet, (1, 1), kwargs[sheet])
+    wb.save(name)
     
 

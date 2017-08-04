@@ -5,8 +5,8 @@
 from data_source import h5
 import pandas as pd
 import os
-root = 'D:/data/XYData20170630/XYData'
-dirs = [x for x in os.listdir(root) if x not in ['基础数据','Growth','Momentum','Others', 'Quality']]
+root = 'D:/data/XYData20170731/XYData'
+dirs = [x for x in os.listdir(root) if x not in ['基础数据']]
 for d in dirs:
     print(d)
     xy_path = root + '/' + d + '/'
