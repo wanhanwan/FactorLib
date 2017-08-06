@@ -5,15 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="0c0d2d5b-e9de-4408-9a23-a2370b6ee147" name="Default" comment="">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bokeh_server/select.html" afterPath="" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/bokeh_server/test.py" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/FactorLib.iml" afterPath="$PROJECT_DIR$/.idea/FactorLib.iml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/base_data_source_h5.py" afterPath="$PROJECT_DIR$/data_source/base_data_source_h5.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/update_data/run_daily.py" afterPath="$PROJECT_DIR$/data_source/update_data/run_daily.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/update_data/run_monthly.py" afterPath="$PROJECT_DIR$/data_source/update_data/run_monthly.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/update_data/time_series_factor.py" afterPath="$PROJECT_DIR$/data_source/update_data/time_series_factor.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/update_data/update_h5db_base_data.py" afterPath="$PROJECT_DIR$/data_source/update_data/update_h5db_base_data.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/update_data/value_factor.py" afterPath="$PROJECT_DIR$/data_source/update_data/value_factor.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/wind_financial_data_api/update.py" afterPath="$PROJECT_DIR$/data_source/wind_financial_data_api/update.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utils/tool_funcs.py" afterPath="$PROJECT_DIR$/utils/tool_funcs.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/data_source/h5db.py" afterPath="$PROJECT_DIR$/data_source/h5db.py" />
     </list>
     <ignored path="FactorLib.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -27,18 +24,20 @@
   </component>
   <component name="CoverageDataManager">
     <SUITE FILE_PATH="coverage/FactorLib$main__2_.coverage" NAME="main (2) Coverage Results" MODIFIED="1496296922859" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/fama_macbeth" />
-    <SUITE FILE_PATH="coverage/FactorLib$run_daily.coverage" NAME="run_daily Coverage Results" MODIFIED="1499061933303" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source/update_data" />
-    <SUITE FILE_PATH="coverage/FactorLib$run_monthly.coverage" NAME="run_monthly Coverage Results" MODIFIED="1499062082351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source/update_data" />
-    <SUITE FILE_PATH="coverage/FactorLib$GF_CGO_AND_RISK_PREFERENCE.coverage" NAME="GF_CGO_AND_RISK_PREFERENCE Coverage Results" MODIFIED="1497839845886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/generateStocks" />
-    <SUITE FILE_PATH="coverage/FactorLib$main.coverage" NAME="main Coverage Results" MODIFIED="1496308426684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/single_factor_test" />
-    <SUITE FILE_PATH="coverage/FactorLib$financial_data_source.coverage" NAME="financial_data_source Coverage Results" MODIFIED="1494258450281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
-    <SUITE FILE_PATH="coverage/FactorLib$ths_click_ratio_neutralization.coverage" NAME="ths_click_ratio_neutralization Coverage Results" MODIFIED="1495675481345" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/scripts" />
     <SUITE FILE_PATH="coverage/FactorLib$.coverage" NAME="成交额与同花顺复合因子 Coverage Results" MODIFIED="1496306128705" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/量化策略/2017/雪球同花顺舆情分析" />
-    <SUITE FILE_PATH="coverage/FactorLib$save_stockinfo_from_excel.coverage" NAME="save_stockinfo_from_excel Coverage Results" MODIFIED="1490320091501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
-    <SUITE FILE_PATH="coverage/FactorLib$test_script.coverage" NAME="test_script Coverage Results" MODIFIED="1490686624519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
+    <SUITE FILE_PATH="coverage/FactorLib$financial_data_source.coverage" NAME="financial_data_source Coverage Results" MODIFIED="1494258450281" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
     <SUITE FILE_PATH="coverage/FactorLib$main__1_.coverage" NAME="main (1) Coverage Results" MODIFIED="1495617146078" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/factor_corr" />
+    <SUITE FILE_PATH="coverage/FactorLib$update_h5db_base_data.coverage" NAME="update_h5db_base_data Coverage Results" MODIFIED="1500821517760" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source/update_data" />
+    <SUITE FILE_PATH="coverage/FactorLib$mailmanager.coverage" NAME="mailmanager Coverage Results" MODIFIED="1500798240155" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/PythonPackages/mailing" />
+    <SUITE FILE_PATH="coverage/FactorLib$run_daily.coverage" NAME="run_daily Coverage Results" MODIFIED="1499061933303" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source/update_data" />
+    <SUITE FILE_PATH="coverage/FactorLib$GF_CGO_AND_RISK_PREFERENCE.coverage" NAME="GF_CGO_AND_RISK_PREFERENCE Coverage Results" MODIFIED="1497839845886" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/generateStocks" />
     <SUITE FILE_PATH="coverage/FactorLib$h5DB.coverage" NAME="h5DB Coverage Results" MODIFIED="1490173678894" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
     <SUITE FILE_PATH="coverage/FactorLib$test.coverage" NAME="test Coverage Results" MODIFIED="1494257200213" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
+    <SUITE FILE_PATH="coverage/FactorLib$save_stockinfo_from_excel.coverage" NAME="save_stockinfo_from_excel Coverage Results" MODIFIED="1490320091501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/scripts" />
+    <SUITE FILE_PATH="coverage/FactorLib$main.coverage" NAME="main Coverage Results" MODIFIED="1496308426684" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/single_factor_test" />
+    <SUITE FILE_PATH="coverage/FactorLib$run_monthly.coverage" NAME="run_monthly Coverage Results" MODIFIED="1499062082351" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source/update_data" />
+    <SUITE FILE_PATH="coverage/FactorLib$ths_click_ratio_neutralization.coverage" NAME="ths_click_ratio_neutralization Coverage Results" MODIFIED="1495675481345" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="D:/scripts" />
+    <SUITE FILE_PATH="coverage/FactorLib$test_script.coverage" NAME="test_script Coverage Results" MODIFIED="1490686624519" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/data_source" />
   </component>
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
@@ -58,28 +57,7 @@
     <favorites_list name="FactorLib" />
   </component>
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="run_monthly.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/data_source/update_data/run_monthly.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="124">
-              <caret line="15" column="8" lean-forward="true" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="value_factor.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/data_source/update_data/value_factor.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-420">
-              <caret line="24" column="63" lean-forward="false" selection-start-line="24" selection-start-column="63" selection-end-line="24" selection-end-column="63" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -105,10 +83,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/data_source/test_script.py" />
-        <option value="$PROJECT_DIR$/data_source/base_data_source.py" />
-        <option value="$PROJECT_DIR$/const.py" />
-        <option value="$PROJECT_DIR$/utils/disk_persist_provider.y.py" />
         <option value="$PROJECT_DIR$/utils/disk_persist_provider.py" />
         <option value="$PROJECT_DIR$/factor_data_process/untradable_stocks_manage.py" />
         <option value="$PROJECT_DIR$/factor_data_process/missing_value_manage.py" />
@@ -148,14 +122,18 @@
         <option value="$PROJECT_DIR$/factor_data_process/generate_stocklist.py" />
         <option value="$PROJECT_DIR$/utils/excel_io.py" />
         <option value="D:/generateStocks/GF_CGO_AND_RISK_PREFERENCE.py" />
-        <option value="$PROJECT_DIR$/data_source/h5db.py" />
         <option value="$PROJECT_DIR$/data_source/update_data/time_series_factor.py" />
         <option value="$PROJECT_DIR$/data_source/update_data/value_factor.py" />
         <option value="D:/PythonPackages/QuantLib/FactorTest.py" />
-        <option value="D:/PythonPackages/QuantLib/__init__.py" />
         <option value="$PROJECT_DIR$/data_source/base_data_source_h5.py" />
         <option value="$PROJECT_DIR$/data_source/update_data/run_daily.py" />
         <option value="$PROJECT_DIR$/data_source/update_data/run_monthly.py" />
+        <option value="D:/PythonPackages/mailing/mail.conf" />
+        <option value="D:/PythonPackages/mailing/mailmanager.py" />
+        <option value="D:/PythonPackages/QuantLib/__init__.py" />
+        <option value="$PROJECT_DIR$/data_source/wind_financial_data_api/update.py" />
+        <option value="$PROJECT_DIR$/data_source/update_data/update_h5db_base_data.py" />
+        <option value="$PROJECT_DIR$/data_source/h5db.py" />
       </list>
     </option>
   </component>
@@ -166,9 +144,10 @@
     <sorting>DEFINITION_ORDER</sorting>
   </component>
   <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="-8" />
-    <option name="width" value="1300" />
-    <option name="height" value="912" />
+    <option name="x" value="329" />
+    <option name="y" value="111" />
+    <option name="width" value="1292" />
+    <option name="height" value="735" />
   </component>
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
@@ -185,6 +164,7 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
+      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -196,13 +176,12 @@
           <select />
         </subPane>
       </pane>
-      <pane id="Scope" />
       <pane id="Scratches" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
     <property name="last_opened_file_path" value="D:/量化策略/2017/雪球同花顺舆情分析" />
   </component>
   <component name="PyConsoleOptionsProvider">
@@ -232,25 +211,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.run_monthly">
-    <configuration name="成交额与同花顺复合因子" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="D:/量化策略/2017/雪球同花顺舆情分析" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="FactorLib" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="D:/量化策略/2017/雪球同花顺舆情分析/成交额与同花顺复合因子.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-    </configuration>
+  <component name="RunManager" selected="Python.update_h5db_base_data">
     <configuration name="GF_CGO_AND_RISK_PREFERENCE" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -483,20 +444,20 @@
       <option name="USE_PATTERN" value="false" />
       <method />
     </configuration>
-    <configuration name="main" type="PythonConfigurationType" factoryName="Python" temporary="true">
+    <configuration name="mailmanager" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs>
         <env name="PYTHONUNBUFFERED" value="1" />
       </envs>
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/single_factor_test" />
+      <option name="WORKING_DIRECTORY" value="D:/PythonPackages/mailing" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="FactorLib" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/single_factor_test/main.py" />
+      <option name="SCRIPT_NAME" value="D:/PythonPackages/mailing/mailmanager.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -537,20 +498,38 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
     </configuration>
+    <configuration name="update_h5db_base_data" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/data_source/update_data" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="FactorLib" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/data_source/update_data/update_h5db_base_data.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+    </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.main" />
-      <item index="1" class="java.lang.String" itemvalue="Python.成交额与同花顺复合因子" />
-      <item index="2" class="java.lang.String" itemvalue="Python.GF_CGO_AND_RISK_PREFERENCE" />
-      <item index="3" class="java.lang.String" itemvalue="Python.run_daily" />
-      <item index="4" class="java.lang.String" itemvalue="Python.run_monthly" />
+      <item index="0" class="java.lang.String" itemvalue="Python.GF_CGO_AND_RISK_PREFERENCE" />
+      <item index="1" class="java.lang.String" itemvalue="Python.run_daily" />
+      <item index="2" class="java.lang.String" itemvalue="Python.run_monthly" />
+      <item index="3" class="java.lang.String" itemvalue="Python.mailmanager" />
+      <item index="4" class="java.lang.String" itemvalue="Python.update_h5db_base_data" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.run_monthly" />
-        <item index="1" class="java.lang.String" itemvalue="Python.run_daily" />
-        <item index="2" class="java.lang.String" itemvalue="Python.GF_CGO_AND_RISK_PREFERENCE" />
-        <item index="3" class="java.lang.String" itemvalue="Python.main" />
-        <item index="4" class="java.lang.String" itemvalue="Python.成交额与同花顺复合因子" />
+        <item index="0" class="java.lang.String" itemvalue="Python.update_h5db_base_data" />
+        <item index="1" class="java.lang.String" itemvalue="Python.mailmanager" />
+        <item index="2" class="java.lang.String" itemvalue="Python.run_monthly" />
+        <item index="3" class="java.lang.String" itemvalue="Python.run_daily" />
+        <item index="4" class="java.lang.String" itemvalue="Python.GF_CGO_AND_RISK_PREFERENCE" />
       </list>
     </recent_temporary>
   </component>
@@ -580,27 +559,27 @@
     </todo-panel>
   </component>
   <component name="ToolWindowManager">
-    <frame x="-8" y="-8" width="1296" height="1000" extended-state="6" />
+    <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.20546874" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.14166667" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32892805" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32892805" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.39797068" sideWeight="0.5234375" order="7" side_tool="true" content_ui="tabs" x="689" y="84" width="751" height="671" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39797068" sideWeight="0.4765625" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18828125" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.43648207" sideWeight="0.53055555" order="7" side_tool="true" content_ui="tabs" x="689" y="84" width="751" height="671" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.18802084" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.48252538" sideWeight="0.48828125" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.56257045" sideWeight="0.47890624" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Data View" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="WINDOWED" visible="false" show_stripe_button="true" weight="0.3296875" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" x="171" y="454" width="581" height="548" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39761093" sideWeight="0.46944445" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3285528" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33617747" sideWeight="0.4712963" order="3" side_tool="false" content_ui="tabs" />
     </layout>
     <layout-to-restore>
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
@@ -642,7 +621,7 @@
       <breakpoints-dialog>
         <breakpoints-dialog />
       </breakpoints-dialog>
-      <option name="time" value="88" />
+      <option name="time" value="90" />
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
@@ -651,37 +630,6 @@
     </watches-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/data_source/base_data_source.py" />
-    <entry file="file://$PROJECT_DIR$/data_source/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="135">
-          <caret line="10" column="0" lean-forward="false" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/bokeh_server/test.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="4" column="0" lean-forward="false" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$USER_HOME$/Downloads/个股分化度研究.py" />
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/pandas/core/reshape/reshape.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-11">
-          <caret line="1084" column="34" lean-forward="false" selection-start-line="1084" selection-start-column="34" selection-end-line="1084" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/PythonPackages/QuantLib/utils.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-93">
-          <caret line="263" column="19" lean-forward="true" selection-start-line="263" selection-start-column="19" selection-end-line="263" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/scripts/StandardQTTest.py" />
     <entry file="file://$PROJECT_DIR$/factor_corr/config.yml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="275">
@@ -704,17 +652,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/numpy/core/numeric.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/numpy/core/numeric.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="530" column="0" lean-forward="false" selection-start-line="530" selection-start-column="0" selection-end-line="530" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/colorama/ansitowin32.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="108">
-          <caret line="36" column="0" lean-forward="false" selection-start-line="36" selection-start-column="0" selection-end-line="36" selection-end-column="0" />
         </state>
       </provider>
     </entry>
@@ -725,14 +666,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/pandas/core/common.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/pandas/core/common.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="379" column="0" lean-forward="false" selection-start-line="379" selection-start-column="0" selection-end-line="379" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/pandas/core/frame.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/pandas/core/frame.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="4359" column="0" lean-forward="false" selection-start-line="4359" selection-start-column="0" selection-end-line="4359" selection-end-column="0" />
@@ -746,7 +687,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/IPython/core/interactiveshell.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/IPython/core/interactiveshell.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="348">
           <caret line="2866" column="0" lean-forward="false" selection-start-line="2866" selection-start-column="0" selection-end-line="2866" selection-end-column="0" />
@@ -867,21 +808,14 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/ntpath.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/ntpath.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="201">
           <caret line="74" column="0" lean-forward="false" selection-start-line="74" selection-start-column="0" selection-end-line="74" selection-end-column="0" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data_source/h5db.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
-          <caret line="68" column="0" lean-forward="true" selection-start-line="68" selection-start-column="0" selection-end-line="68" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/codecs.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/codecs.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="148">
           <caret line="308" column="0" lean-forward="false" selection-start-line="308" selection-start-column="0" selection-end-line="308" selection-end-column="0" />
@@ -899,7 +833,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="344">
           <caret line="62" column="0" lean-forward="false" selection-start-line="62" selection-start-column="0" selection-end-line="62" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -907,63 +840,13 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
           <caret line="13" column="20" lean-forward="false" selection-start-line="13" selection-start-column="20" selection-end-line="13" selection-end-column="20" />
-          <folding>
-            <marker date="1498728790659" expanded="true" signature="69:76" ph="20170502" />
-            <marker date="1498728790659" expanded="true" signature="111:144" ph="D:/Factor…or_list.py" />
-            <marker date="1498728790659" expanded="true" signature="257:261" ph="1m" />
-            <marker date="1498728790659" expanded="true" signature="290:298" ph="000905" />
-            <marker date="1498728790659" expanded="true" signature="300:1448" ph="mod : &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="322:507" ph="missing_v…ue_manage : &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="363:367" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="387:389" ph="10" />
-            <marker date="1498728790659" expanded="true" signature="420:462" ph="factor_da…lue_manage" />
-            <marker date="1498728790659" expanded="true" signature="471:488" ph="func : [1 item]" />
-            <marker date="1498728790659" expanded="true" signature="479:487" ph="delete" />
-            <marker date="1498728790659" expanded="true" signature="525:682" ph="outlier_manage: &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="559:564" ph="false" />
-            <marker date="1498728790659" expanded="true" signature="584:586" ph="20" />
-            <marker date="1498728790659" expanded="true" signature="601:637" ph="factor_da…ier_manage" />
-            <marker date="1498728790659" expanded="true" signature="646:663" ph="func : [1 item]" />
-            <marker date="1498728790659" expanded="true" signature="654:662" ph="delete" />
-            <marker date="1498728790659" expanded="true" signature="709:901" ph="untradabl…cks_manage: &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="753:757" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="777:779" ph="30" />
-            <marker date="1498728790659" expanded="true" signature="794:840" ph="factor_da…cks_manage" />
-            <marker date="1498728790659" expanded="true" signature="849:882" ph="func : [1 item]" />
-            <marker date="1498728790659" expanded="true" signature="857:881" ph="drop_untr…ble_stocks" />
-            <marker date="1498728790659" expanded="true" signature="917:1179" ph="grouping_manage: &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="952:956" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="976:978" ph="40" />
-            <marker date="1498728790659" expanded="true" signature="993:1030" ph="factor_da…ing_manage" />
-            <marker date="1498728790659" expanded="true" signature="1039:1057" ph="func : [1 item]" />
-            <marker date="1498728790659" expanded="true" signature="1047:1056" ph="typical" />
-            <marker date="1498728790659" expanded="true" signature="1066:1179" ph="kwargs: &lt;3 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="1101:1103" ph="10" />
-            <marker date="1498728790659" expanded="true" signature="1132:1138" ph="申万二级" />
-            <marker date="1498728790659" expanded="true" signature="1177:1179" ph="20" />
-            <marker date="1498728790659" expanded="true" signature="1195:1448" ph="stocklist_manage: &lt;5 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="1231:1235" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="1254:1256" ph="40" />
-            <marker date="1498728790659" expanded="true" signature="1271:1311" ph="factor_da…_stocklist" />
-            <marker date="1498728790659" expanded="true" signature="1320:1338" ph="func : [1 item]" />
-            <marker date="1498728790659" expanded="true" signature="1328:1337" ph="typical" />
-            <marker date="1498728790659" expanded="true" signature="1347:1448" ph="kwargs: &lt;3 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="1386:1390" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="1419:1425" ph="中信一级" />
-            <marker date="1498728790659" expanded="true" signature="1444:1448" ph="0.05" />
-            <marker date="1498728790659" expanded="true" signature="1449:1541" ph="extra : &lt;2 keys&gt;" />
-            <marker date="1498728790659" expanded="true" signature="1483:1487" ph="true" />
-            <marker date="1498728790659" expanded="true" signature="1528:1541" ph="D:/factors/" />
-            <marker date="1498728790659" expanded="true" signature="1539:1541" ph="D:/factor…申万医药生物股票池/" />
-          </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://D:/Programs/Anaconda3/Lib/site-packages/pandas/io/pytables.py">
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/pandas/io/pytables.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="120">
           <caret line="323" column="0" lean-forward="false" selection-start-line="323" selection-start-column="0" selection-end-line="323" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -971,17 +854,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
           <caret line="7" column="0" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#19#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://D:/PythonPackages/QuantLib/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="0" lean-forward="true" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -989,7 +861,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-1444">
           <caret line="78" column="46" lean-forward="false" selection-start-line="78" selection-start-column="46" selection-end-line="78" selection-end-column="46" />
-          <folding />
         </state>
       </provider>
     </entry>
@@ -997,9 +868,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-120">
           <caret line="13" column="23" lean-forward="true" selection-start-line="13" selection-start-column="23" selection-end-line="13" selection-end-column="23" />
-          <folding>
-            <element signature="e#12#31#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1007,30 +875,98 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="184">
           <caret line="20" column="4" lean-forward="true" selection-start-line="20" selection-start-column="4" selection-end-line="20" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/update_data/value_factor.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="391">
+          <caret line="24" column="63" lean-forward="false" selection-start-line="24" selection-start-column="63" selection-end-line="24" selection-end-column="63" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/data_source/base_data_source_h5.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="23" column="11" lean-forward="true" selection-start-line="23" selection-start-column="11" selection-end-line="23" selection-end-column="11" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data_source/update_data/value_factor.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-420">
-          <caret line="24" column="63" lean-forward="false" selection-start-line="24" selection-start-column="63" selection-end-line="24" selection-end-column="63" />
-          <folding />
+        <state relative-caret-position="1820">
+          <caret line="383" column="17" lean-forward="false" selection-start-line="383" selection-start-column="17" selection-end-line="383" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/data_source/update_data/run_monthly.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="124">
-          <caret line="15" column="8" lean-forward="true" selection-start-line="15" selection-start-column="8" selection-end-line="15" selection-end-column="8" />
+        <state relative-caret-position="226">
+          <caret line="21" column="43" lean-forward="false" selection-start-line="21" selection-start-column="43" selection-end-line="21" selection-end-column="43" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/programs/Anaconda3/Lib/site-packages/colorama/ansitowin32.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1195">
+          <caret line="148" column="24" lean-forward="true" selection-start-line="148" selection-start-column="24" selection-end-line="148" selection-end-column="24" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/PythonPackages/mailing/mail.conf">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="68">
+          <caret line="4" column="37" lean-forward="true" selection-start-line="4" selection-start-column="37" selection-end-line="4" selection-end-column="37" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/PythonPackages/QuantLib/__init__.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="170">
+          <caret line="10" column="0" lean-forward="true" selection-start-line="10" selection-start-column="0" selection-end-line="10" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/PythonPackages/filemanager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="18" column="1" lean-forward="false" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/wind_plugin.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="43" column="47" lean-forward="false" selection-start-line="43" selection-start-column="47" selection-end-line="43" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/wind_financial_data_api/update.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="49" column="0" lean-forward="false" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/update_data/update_h5db_base_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="499">
+          <caret line="184" column="10" lean-forward="false" selection-start-line="184" selection-start-column="10" selection-end-line="184" selection-end-column="10" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/h5db.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1587">
+          <caret line="191" column="0" lean-forward="true" selection-start-line="191" selection-start-column="0" selection-end-line="191" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://D:/PythonPackages/mailing/mailmanager.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1855">
+          <caret line="85" column="0" lean-forward="false" selection-start-line="85" selection-start-column="0" selection-end-line="85" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data_source/wind_financial_data_api/wind_api_const.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="16" column="27" lean-forward="false" selection-start-line="16" selection-start-column="27" selection-end-line="16" selection-end-column="27" />
           <folding />
         </state>
       </provider>

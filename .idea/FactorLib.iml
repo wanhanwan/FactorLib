@@ -5,7 +5,7 @@
     <content url="file://D:/PythonPackages" />
     <content url="file://D:/scripts" />
     <content url="file://D:/量化策略/2017/雪球同花顺舆情分析" />
-    <orderEntry type="jdk" jdkName="Python 3.6.0 (D:\Programs\Anaconda3\python.exe)" jdkType="Python SDK" />
+    <orderEntry type="jdk" jdkName="Python 3.6.0 (D:\programs\Anaconda3\python.exe)" jdkType="Python SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
   </component>
   <component name="TestRunnerService">
