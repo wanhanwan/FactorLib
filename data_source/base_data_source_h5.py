@@ -6,6 +6,7 @@ from const import SW_INDUSTRY_DICT,CS_INDUSTRY_DICT,MARKET_INDEX_DICT
 from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex, windcode_to_tradecode
 from utils.datetime_func import DateStr2Datetime, Datetime2DateStr
 from datetime import timedelta, datetime
+from functools import lru_cache
 
 
 class base_data_source(object):
@@ -249,9 +250,34 @@ class base_data_source(object):
             return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 9]
         else:
             return ann_report_dates[pd.DatetimeIndex(ann_report_dates['date']).month == 12]
-    
+
+    def to_dailyfinancial(self, factorname, type='realtime'):
+        today = datetime.today().strftime("%Y%m%d")
+        if type == 'realtime':
+            data = self.get_latest_report(factorname, start_date='20070101', end_date=today)
+            self.h5DB.save_factor(data[[factorname]], '/stock_financial_data/realtime_daily/')
+        else:
+            dates = pd.DatetimeIndex(self.trade_calendar.get_trade_days('20070101', today))
+
+            @lru_cache()
+            def _mapdate(date):
+                if date.month == 3:
+                    return pd.datetime(date.year, 4, 30)
+                elif date.month == 6:
+                    return pd.datetime(date.year, 8, 31)
+                elif date.month == 9:
+                    return pd.datetime(date.year, 10, 31)
+                else:
+                    return pd.datetime(date.year+1, 4, 30)
+            data = self.h5DB.load_factor(factorname, '/stock_financial_data/').reset_index()
+            data = data[pd.DatetimeIndex(data['date']).month != 12]
+            data['realdate'] = data['date'].apply(_mapdate)
+            data = data.set_index(['realdate', 'IDs'])[[factorname]].unstack().reindex(dates, method='ffill').stack()
+            data.index.names = ['date', 'IDs']
+            self.h5DB.save_factor(data, '/stock_financial_data/daily/')
+
     def get_dividends(self, ids, dates):
-        """在指定截止日前的红利数据"""
+        """在指定截止日前最近年报的红利数据"""
         dates = pd.DatetimeIndex(dates)
         l = []
         for date in dates:
@@ -283,7 +309,7 @@ class sector(object):
     def get_suspend(self, dates=None, start_date=None, end_date=None):
         """某一时间段停牌的股票"""
         dates = self.trade_calendar.get_trade_days(start_date, end_date) if dates is None else dates
-        if not isinstance(dates,list):
+        if not isinstance(dates, list):
             dates = [dates]
         suspend = self.h5DB.load_factor('volume', '/stocks/', dates=dates)
         suspend = suspend.query('volume == 0')
@@ -292,11 +318,11 @@ class sector(object):
     def get_uplimit(self, dates=None, start_date=None, end_date=None):
         """某一时间段内涨停的股票"""
         dates = self.trade_calendar.get_trade_days(start_date, end_date) if dates is None else dates
-        if not isinstance(dates,list):
+        if not isinstance(dates, list):
             dates = [dates]
-        factors = {'/stocks/': ['high', 'low', 'daily_returns_%'],}
+        factors = {'/stocks/': ['high', 'low', 'daily_returns_%']}
         uplimit = self.h5DB.load_factors(factors, dates=dates)
-        uplimit = uplimit[(uplimit['high']==uplimit['low'])&(uplimit['daily_returns_%']>9.5)]
+        uplimit = uplimit[(uplimit['high'] == uplimit['low']) & (uplimit['daily_returns_%'] > 9.5)]
         return uplimit['high']
 
     def get_downlimit(self,dates=None, start_date=None, end_date=None):
@@ -363,11 +389,13 @@ class sector(object):
         index_industry_weight = common.reset_index().groupby(['date', symbol])[index_weight.columns[0]].sum()
         return index_industry_weight
 
-    def get_history_ashare(self, dates):
+    def get_history_ashare(self, dates, history=False):
         """获得某一天的所有上市A股"""
         if isinstance(dates, str):
             dates = [dates]
         stocks = self.h5DB.load_factor('ashare', '/indexes/', dates=dates)
+        if history:
+            stocks = stocks.unstack().expanding().max().stack()
         return stocks
 
     def get_ashare_onlist(self, dates, months_filter=24):
@@ -381,12 +409,8 @@ class sector(object):
         ashare_info = ashare_info.join(ashare_backdoordate).reset_index()
         ashare_info['backdoordate'] = ashare_info['backdoordate'].fillna('21000101')
 
-        def f(x):
-            if x['date'] >= DateStr2Datetime(x['backdoordate']):
-                return x['backdoordate']
-            else:
-                return x['list_date']
-        ashare_info['new_listdate'] = ashare_info.apply(f, axis=1)
+        backdoordate = ashare_info['backdoordate'].apply(DateStr2Datetime)
+        ashare_info['new_listdate'] = np.where(ashare_info['date']>=backdoordate, ashare_info['backdoordate'], ashare_info['list_date'])
         onlist_period = ashare_info['date'] - ashare_info['new_listdate'].apply(DateStr2Datetime)
         temp_ind = (onlist_period / timedelta(1)) > months_filter * 30
         return ashare_info.set_index(['date', 'IDs']).loc[temp_ind.values, ['list_date']].copy()

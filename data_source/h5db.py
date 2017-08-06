@@ -19,17 +19,11 @@ class H5DB(object):
     def _update_info(self):
         factor_list = []
         
-        def update_factors(path, root='/'):
-            for file in os.listdir(path):
-                file_path = os.path.join(path, file)
-                if os.path.isdir(file_path):
-                    update_factors(file_path, root=root+'%s/' % file)
-                else:
-                    if file[-3:] == '.h5':
-                        factor_list.append([root, file[:-3]])
-                    else:
-                        pass
-        update_factors(self.data_path)
+        for root, subdirs, files in os.walk(self.data_path):
+            relpath = "/%s/"%os.path.relpath(root, self.data_path).replace("\\", "/")
+            for file in files:
+                if file.endswith(".h5"):
+                    factor_list.append([relpath, file[:-3]])
         self.data_dict = pd.DataFrame(
             factor_list, columns=['path', 'name'])
     
@@ -143,6 +137,9 @@ class H5DB(object):
     
     def to_feather(self, factor_name, factor_dir):
         """将某一个因子转换成feather格式，便于跨平台使用"""
+        target_dir = self.feather_data_path + factor_dir
+        if not os.path.isdir(target_dir):
+            os.mkdir(target_dir)
         data = self.load_factor(factor_name, factor_dir).reset_index()
         data.to_feather(self.feather_data_path+factor_dir+factor_name+'.feather')
 

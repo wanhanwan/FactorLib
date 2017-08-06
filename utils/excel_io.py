@@ -119,9 +119,9 @@ def save_summary_to_excel(factors, file_path, env, method='typical'):
     active_sheet = wb.active
     active_sheet.title = "IC"
     write_df_to_excel(active_sheet, (1, 1), ic_series)
-    active_sheet = wb.create_sheet("分位数多空组合")
-    write_df_to_excel(active_sheet, (1, 1), long_only)
     active_sheet = wb.create_sheet("分位数多头组合")
+    write_df_to_excel(active_sheet, (1, 1), long_only)
+    active_sheet = wb.create_sheet("分位数多空组合")
     write_df_to_excel(active_sheet, (1, 1), long_short)
     file_name = file_path + os.sep + 'summary.xlsx'
     wb.save(filename=file_name)
@@ -135,5 +135,13 @@ def save_stock_list(factor, file_path, env):
         stock_list['IDs'] = stock_list['IDs'].apply(tradecode_to_windcode)
         file_name = "_".join([os.path.join(file_path,factor.name), 'stock_list', _m+'.csv'])
         stock_list.to_csv(file_name, index=False)
+
+
+def write_xlsx(name, **kwargs):
+    wb = Workbook()
+    for sheet in kwargs:
+        activesheet = wb.create_sheet(sheet)
+        write_df_to_excel(activesheet, (1, 1), kwargs[sheet])
+    wb.save(name)
     
 

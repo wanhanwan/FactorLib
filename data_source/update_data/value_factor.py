@@ -56,7 +56,7 @@ def ep(start, end, **kwargs):
 
 def bp_divide_median(start, end, **kwargs):
     data_source = kwargs['data_source']
-    dates = data_source.trade_calendar.get_trade_days(start, end, '1m')
+    dates = data_source.trade_calendar.get_trade_days(start, end)
     bp = data_source.load_factor('bp', '/stock_value/', dates=dates)
     ids = bp.index.get_level_values(1).unique().tolist()
     industry = data_source.sector.get_stock_industry_info(ids, dates=dates)
@@ -73,7 +73,7 @@ def bp_divide_median(start, end, **kwargs):
 
 def ep_divide_median(start, end, **kwargs):
     data_source = kwargs['data_source']
-    dates = data_source.trade_calendar.get_trade_days(start, end, '1m')
+    dates = data_source.trade_calendar.get_trade_days(start, end)
     ep = data_source.load_factor('ep', '/stock_value/', dates=dates)
     ids = ep.index.get_level_values(1).unique().tolist()
     industry = data_source.sector.get_stock_industry_info(ids, dates=dates)
@@ -88,5 +88,11 @@ def ep_divide_median(start, end, **kwargs):
     data_source.h5DB.save_factor(ep[['ep_divide_median']], '/stock_value/')
 
 
-ValueFuncListDaily = [pe_ttm, pe, pb, bp, ep]
-ValueFuncListMonthly = [bp_divide_median,ep_divide_median]
+ValueFuncListDaily = [pe_ttm, pe, pb, bp, ep, bp_divide_median, ep_divide_median]
+ValueFuncListMonthly = []
+
+
+if __name__ == '__main__':
+    from data_source import data_source
+    bp_divide_median('20170701', '20170731', data_source=data_source)
+    ep_divide_median('20170701', '20170731', data_source=data_source)

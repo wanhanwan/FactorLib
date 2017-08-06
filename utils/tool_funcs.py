@@ -7,6 +7,8 @@ from const import (INDUSTRY_NAME_DICT,
                    )
 import pandas as pd
 import os
+import importlib.util as ilu
+
 
 def dict_reverse(_dict):
     return {_dict[x]:x for x in _dict}
@@ -52,6 +54,12 @@ def import_mod(mod_name):
         return import_module(mod_name)
     except Exception as e:
         return None
+
+def import_module(module_name, module_path):
+    spec = ilu.spec_from_file_location(module_name, module_path)
+    m = ilu.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
 
 def ensure_dir_exists(dir_path):
     import os

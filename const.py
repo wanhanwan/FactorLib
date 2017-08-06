@@ -40,4 +40,4 @@ DATEMULTIPLIER = {'m':20,'w':5,'Y':252}
 # iFind接口相关
 THS_USERID = 'xyjj096'
 THS_PASSWORD = '1991822929'
-DEFAULT_PARAMS = "period:D,pricetype:6,rptcategory:0,fqdate:1900-01-01,hb:YSHB,fill:Previous"
+THS_BAR_DEFAULT_PARAMS = "period:D,pricetype:6,rptcategory:0,fqdate:1900-01-01,hb:YSHB,fill:Previous"
