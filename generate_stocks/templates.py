@@ -5,6 +5,7 @@ from single_factor_test.factor_list import *
 from single_factor_test.selfDefinedFactors import *
 from utils.disk_persist_provider import DiskPersistProvider
 from datetime import datetime
+from utils.tool_funcs import tradecode_to_windcode
 import os
 from generate_stocks import funcs, stocklist
 import pandas as pd
@@ -36,18 +37,19 @@ class AbstractStockGenerator(object):
 
     def _update_stocks(self, start, end):
         stocks = self.generate_stocks(start, end).reset_index(level=1)
+        stocks['IDs'] = stocks['IDs'].apply(tradecode_to_windcode)
         if os.path.isfile(self.config.stocklist.output):
             raw = pd.read_csv(self.config.stocklist.output).set_index('date')
             new = raw.append(stocks)
-            new = new[~new.index.duplicated(keep='last')]
-            new.reset_index().to_csv(self.config.stocklist.output)
+            new = new[~new.index.duplicated(keep='last')].reset_index()
+            new.reset_index().to_csv(self.config.stocklist.output, float_format="%.4f", index=False)
         else:
-            stocks.reset_index().to_csv(self.config.stocklist.output)
+            stocks.reset_index().to_csv(self.config.stocklist.output, float_format="%.4f", index=False)
 
     def _update_tempdata(self, start, end, **kwargs):
         temp = self.generate_tempdata(start, end, **kwargs)
         for k, v in temp.items():
-            name = "%s_%s"%(k, datetime.now().strftime("%Y%m%d_%H:%M"))
+            name = "%s_%s"%(k, datetime.now().strftime("%Y%m%d%H%M"))
             self.persist_provider.dump(v, name)
 
     def update(self, start, end, **kwargs):
