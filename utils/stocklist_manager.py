@@ -1,5 +1,3 @@
-from utils.datetime_func import DateStr2Datetime
-import importlib.util
 import pandas as pd
 import os
 import shutil
@@ -25,3 +23,20 @@ class StockListManager(object):
         if self.check_file_exists(os.path.split(src)[1].replace('.csv', '')):
             raise FileExistsError
         shutil.copy(src, self._stocklist_path)
+
+    def delete_stocklist(self, info):
+        if not self.check_file_exists(info['stocklist_name']):
+            raise FileNotFoundError
+        os.remove(info['stocklist_name']+'.csv')
+
+    # 获取历史股票持仓
+    def get_position(self, name, date):
+        f = open(os.path.join(self._stocklist_path, name+'.csv'))
+        return pd.read_csv(f).loc[date]
+
+    # 获取最近的持仓
+    def get_latest_position(self, name):
+        max_date = self.max_rebalance_date(name)
+        f = open(os.path.join(self._stocklist_path, name+'.csv'))
+        return pd.read_csv(f).loc[max_date]
+

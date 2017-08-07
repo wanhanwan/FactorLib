@@ -15,4 +15,4 @@ factor_list1 = [bp_div_median, ep_div_median, float_mkt_value, six_month_highest
 
 factor_list2 = [ths_click_ratio]
 
-factor_list = factor_list1
+factor_list = factor_list2

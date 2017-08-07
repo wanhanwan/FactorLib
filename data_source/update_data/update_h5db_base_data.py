@@ -202,8 +202,8 @@ if __name__ == '__main__':
     from data_source.wind_financial_data_api import update
     from run_daily import dailyfactors
 
-    start = '20170803'
-    end = '20170803'
+    start = '20170804'
+    end = '20170807'
     UpdateFuncs = [onlist,
                    update_price,
                    update_sector,

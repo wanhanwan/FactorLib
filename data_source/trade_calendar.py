@@ -3,6 +3,7 @@ import os
 
 from utils.datetime_func import getWeekLastDay,getWeekFirstDay,getMonthFirstDay,getMonthLastDay, Datetime2DateStr
 from functools import lru_cache
+from datetime import datetime, time
 
 
 class trade_calendar(object):
@@ -78,3 +79,8 @@ class trade_calendar(object):
     def get_latest_trade_days(self, days):
         series = pd.Series(self.allTradeDays, index=self.allTradeDays).sort_index()
         return series.reindex(days, method='ffill').tolist()
+
+    def is_trading_time(self, date_time):
+        is_tradingdate = self.is_trade_day(date_time.date)
+        is_tradingtime = time(9, 25, 0) < date_time.time() < time(15, 0, 0)
+        return is_tradingdate and is_tradingtime
