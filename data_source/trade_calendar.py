@@ -56,11 +56,11 @@ class trade_calendar(object):
         else:
             return tempData[abs(n) - 1]
     
-    def is_trade_day(self,day):
-        if isinstance(day,str):
+    def is_trade_day(self, day):
+        if isinstance(day, str):
             return day in trade_calendar.allTradeDays
         else:
-            return day in pd.DatetimeIndex(trade_calendar.allTradeDays)
+            return day in self.allTradeDays_idx
 
     @lru_cache()
     def latest_trade_day(self, day, trade_days=None):
@@ -77,10 +77,13 @@ class trade_calendar(object):
         return trade_days[trade_days >= day][0]
 
     def get_latest_trade_days(self, days):
+        """days: string format"""
         series = pd.Series(self.allTradeDays, index=self.allTradeDays).sort_index()
+        if not isinstance(days, list):
+            return series[series<=days].iloc[-1]
         return series.reindex(days, method='ffill').tolist()
 
     def is_trading_time(self, date_time):
-        is_tradingdate = self.is_trade_day(date_time.date)
+        is_tradingdate = self.is_trade_day(date_time.date())
         is_tradingtime = time(9, 25, 0) < date_time.time() < time(15, 0, 0)
         return is_tradingdate and is_tradingtime

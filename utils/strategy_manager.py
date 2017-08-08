@@ -3,6 +3,8 @@ from single_factor_test.config import parse_config
 from utils import AttrDict
 from datetime import datetime
 from data_source import tc
+from data_source.wind_plugin import realtime_quote, get_history_bar
+from utils.tool_funcs import windcode_to_tradecode
 import pandas as pd
 import os
 import shutil
@@ -45,16 +47,18 @@ class StrategyManager(object):
     # 策略对应的股票列表名称和ID
     def strategy_stocklist(self, strategy_id=None, strategy_name=None):
         if strategy_id is not None:
-            return self._strategy_dict[self._strategy_dict.ID == strategy_id][['stocklist_name', 'stockList_id']]
+            return self._strategy_dict.loc[self._strategy_dict.id == strategy_id,
+                                           ['stocklist_name', 'stocklist_id']].iloc[0]
         elif strategy_name is not None:
-            return self._strategy_dict[self._strategy_dict.name == strategy_name][['stocklist_name', 'stockList_id']]
+            return self._strategy_dict.loc[self._strategy_dict.name == strategy_name,
+                                           ['stocklist_name', 'stocklist_id']].iloc[0]
         else:
             raise KeyError("No strategy identifier is provided")
 
     # 策略ID对应的策略名称
     def strategy_name(self, strategy_id=None):
         if strategy_id is not None:
-            return self._strategy_dict[self._strategy_dict.Name == strategy_id]['Name']
+            return self._strategy_dict.loc[self._strategy_dict.id == strategy_id, 'name'].iloc[0]
 
     # 策略是否已存在
     def if_exists(self, name):
@@ -120,12 +124,12 @@ class StrategyManager(object):
         if name is not None:
             shutil.rmtree(os.path.join(self._strategy_path, name))
             self._strategy_dict = self._strategy_dict[self._strategy_dict.name != name]
-            self._stocklist_manager.delete_stocklist([self.strategy_stocklist(strategy_name=name)])
+            self._stocklist_manager.delete_stocklist(self.strategy_stocklist(strategy_name=name))
         elif strategy_id is not None:
             name = self.strategy_name(strategy_id)
             shutil.rmtree(os.path.join(self._stocklist_path, name))
             self._strategy_dict = self._strategy_dict[self._strategy_dict.name != name]
-            self._stocklist_manager.delete_stocklist([self.strategy_stocklist(strategy_id=strategy_id)])
+            self._stocklist_manager.delete_stocklist(self.strategy_stocklist(strategy_id=strategy_id))
         else:
             self._save()
             raise KeyError("No strategy identifier is provided")
@@ -135,21 +139,40 @@ class StrategyManager(object):
     def latest_position(self, strategy_name=None, strategy_id=None):
         stocklist_info = self.strategy_stocklist(strategy_id, strategy_name)
         if strategy_name is not None:
-            max_date = self._strategy_dict.loc[self._strategy_dict.name==strategy_name, 'latest_rebalance_date']
+            max_date = self._strategy_dict[self._strategy_dict.name==strategy_name]['latest_rebalance_date']
         else:
-            max_date = self._strategy_dict[self._strategy_dict.id==strategy_id, 'latest_rebalance_date']
+            max_date = self._strategy_dict[self._strategy_dict.id==strategy_id]['latest_rebalance_date']
         return self._stocklist_manager.get_position(stocklist_info['stocklist_name'], max_date)
 
     # 生成交易指令
     def generate_tradeorder(self, strategy_id, capital, realtime=False):
+        idx = pd.IndexSlice
+        today = tc.get_latest_trade_days(datetime.today().strftime('%Y%m%d'))
         stocks = self.latest_position(strategy_id=strategy_id)
-        """如果当前是交易时间，"""
-        if tc.is_trading_time(datetime.now()):
-
+        stocks.index = stocks.index.set_levels([pd.to_datetime(datetime.today().date())], level=0)
+        stocks.index = stocks.index.set_levels([windcode_to_tradecode(x) for x in stocks.index.get_level_values(1)], level=1)
+        stock_ids = stocks.index.get_level_values(1).tolist()
+        last_close = get_history_bar(['收盘价'], start_date=today, end_date=today, **{'复权方式': '前复权'})
+        last_close.index = last_close.index.set_levels([pd.to_datetime(datetime.today().date())], level=0)
+        """如果当前是交易时间，需要区分停牌和非停牌股票。停牌股票取昨日前复权收盘价，
+        非停牌股票取最新成交价。若非交易时间统一使用最新前复权收盘价。"""
+        if tc.is_trading_time(datetime.now()) and not realtime:
+            data = realtime_quote(['rt_last', 'rt_susp_flag'], ids=stock_ids)
+            tradeprice = data['rt_last'].where(data['rt_susp_flag']!=1, last_close['close'])
+        else:
+            tradeprice = last_close.loc[idx[:, stock_ids], 'close']
+        tradeorders = (stocks['Weight'] * capital / tradeprice / 100).reset_index().rename(columns={'IDs': '股票代码',
+                                                                                                    0: '手数'})
+        strategy_name = self.strategy_name(strategy_id)
+        cwd = os.getcwd()
+        os.chdir(os.path.join(self._strategy_path, strategy_name))
+        tradeorders[['股票代码','手数']].to_excel('权重文件.xlsx', index=False, float_format='%.4f')
+        os.chdir(cwd)
         return
 
 
 if __name__ == '__main__':
     sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
     # sm.delete(name="GMTB")
-    sm.create_from_directory('D:/data/factor_investment_temp_strategies/GMTB')
+    # sm.create_from_directory('D:/data/factor_investment_temp_strategies/GMTB')
+    sm.generate_tradeorder(1, 1000000000)

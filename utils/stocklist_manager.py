@@ -32,7 +32,7 @@ class StockListManager(object):
     # 获取历史股票持仓
     def get_position(self, name, date):
         f = open(os.path.join(self._stocklist_path, name+'.csv'))
-        return pd.read_csv(f).loc[date]
+        return pd.read_csv(f).set_index(['date','IDs']).loc[date]
 
     # 获取最近的持仓
     def get_latest_position(self, name):

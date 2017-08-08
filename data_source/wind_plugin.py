@@ -50,6 +50,20 @@ def get_history_bar(field_names, start_date, end_date, id_type='stock', **kwargs
     return data
 
 
+# WSQ实时行情接口
+def realtime_quote(fieldnames, ids=None):
+    if not isinstance(fieldnames, list):
+        fieldnames = [fieldnames]
+    if ids is None:
+        ids = data_api.get_history_ashare(datetime.today().strftime("%Y%m%d")).index.get_level_values(1)
+    _l = []
+    for field in fieldnames:
+        data = w.wsq(list(map(tradecode_to_windcode, ids)), field)
+        _l.append(_bar_to_dataframe(data))
+    data = pd.concat(_l, axis=1)
+    return data
+
+
 def _parse_args(args,**kwargs):
     """解析参数信息，返回WindAPI字符串"""
     arg_str = []
@@ -68,6 +82,7 @@ def _parse_args(args,**kwargs):
             )
     return ";".join(arg_str)
 
+
 def _bar_to_dataframe(data):
     """把windAPI数据转换成dataframe"""
     ids = list(map(drop_patch, data.Codes))
@@ -77,9 +92,9 @@ def _bar_to_dataframe(data):
         df = pd.DataFrame(data.Data)
     else:
         df = pd.DataFrame(data.Data).T
-    df.index = pd.DatetimeIndex(dates,name='date')
+    df.index = pd.DatetimeIndex(dates, name='date')
     df.columns = col
-    df = df.stack().to_frame().sort_index().rename(columns={0:data.Fields[0].lower()})
+    df = df.stack().to_frame().sort_index().rename(columns={0: data.Fields[0].lower()})
     return df
 
 
