@@ -1,9 +1,9 @@
 # 为单因子测试添加设置文件
 
 # 回测开始日期
-start_date : '20160601'
+start_date : '20170131'
 # 回测终止日期
-end_date : '20170629'
+end_date : '20170628'
 # 待测试因子列表文件
 factor_list_file : 'D:/FactorLib/single_factor_test/selfDefinedFactors.py'
 # 因子测试股票池,默认是全A. 其他待选项见const.py文件中MARKET_INDEX_DICT变量
@@ -60,4 +60,4 @@ extra :
     persist : true
 
     # 因子测试结果输出路径
-    result_file_dir : 'D:/factors/全市场_过去12个月/'
+    result_file_dir : 'D:/factors/全市场_过去6个月/'

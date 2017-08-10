@@ -4,15 +4,16 @@ from utils import AttrDict
 from datetime import datetime
 from data_source import tc
 from data_source.wind_plugin import realtime_quote, get_history_bar
-from utils.tool_funcs import windcode_to_tradecode
+from utils.tool_funcs import windcode_to_tradecode, import_module
 import pandas as pd
+import numpy as np
 import os
 import shutil
 
 
 class StrategyManager(object):
     fields = ['id', 'name', 'researcher', 'latest_rebalance_date', 'stocklist_name', 'stocklist_id','stockpool',
-              'benchmark', 'first_rebalance_date', 'rebalance_frequence']
+              'benchmark', 'first_rebalance_date', 'rebalance_frequence', 'industry_neutral', 'industry_class']
 
     def __init__(self, strategy_path, stocklist_path):
         self._strategy_path = strategy_path
@@ -30,7 +31,7 @@ class StrategyManager(object):
         if not os.path.isfile(os.path.join(self._strategy_path, 'summary.csv')):
             self._strategy_dict = pd.DataFrame(columns=self.fields)
             self._strategy_dict.to_csv(os.path.join(self._strategy_path, 'summary.csv'), index=False)
-        self._strategy_dict = pd.read_csv(os.path.join(self._strategy_path, 'summary.csv'))
+        self._strategy_dict = pd.read_csv(os.path.join(self._strategy_path, 'summary.csv'), encoding='GBK')
 
     # 保存信息
     def _save(self):
@@ -60,6 +61,10 @@ class StrategyManager(object):
         if strategy_id is not None:
             return self._strategy_dict.loc[self._strategy_dict.id == strategy_id, 'name'].iloc[0]
 
+    def strategy_id(self, strategy_name=None):
+        if strategy_name is not None:
+            return self._strategy_dict.loc[self._strategy_dict.name == strategy_name, 'id'].iloc[0]
+
     # 策略是否已存在
     def if_exists(self, name):
         return name in self._strategy_dict['name'].tolist()
@@ -79,27 +84,56 @@ class StrategyManager(object):
         os.mkdir(strategy_path)
         # 复制初始股票列表
         stocklist_filename = strategy_config.stocklist.output
-        shutil.copy(stocklist_filename, strategy_path)
-        self._stocklist_manager.add_new_one(os.path.abspath(stocklist_filename))
+        stocklist_name = stocklist_filename.replace('.csv', '')
+        # 策略的调仓日期
+        if os.path.isfile(stocklist_filename):
+            shutil.copy(stocklist_filename, strategy_path)
+            self._stocklist_manager.add_new_one(os.path.abspath(stocklist_filename))
+            first_rebalance_date = self._stocklist_manager.min_rebalance_date(stocklist_name)
+            latest_rebalance_date = self._stocklist_manager.max_rebalance_date(stocklist_name)
+        else:
+            first_rebalance_date = np.nan
+            latest_rebalance_date = np.nan
         # 复制中间数据
         if os.path.isdir('temp'):
             shutil.copytree('temp', os.path.join(strategy_path, 'temp'))
         # 复制股票列表更新程序
         if os.path.isdir('update'):
             shutil.copytree('update', os.path.join(strategy_path, 'update'))
-        # 策略的调仓日期
-        stocklist_name = stocklist_filename.replace('.csv', '')
-        first_rebalance_date = self._stocklist_manager.min_rebalance_date(stocklist_name)
-        latest_rebalance_date = self._stocklist_manager.max_rebalance_date(stocklist_name)
+        # 复制设置文件
+        shutil.copy("config.yml", strategy_path)
+        # 行业中性
+        industry_neutral = '是' if strategy_config.stocklist.industry_neutral else '否'
+        industry_class = strategy_config.stocklist.industry
         # 添加新的记录
         self._add_record(stocklist_name=stocklist_name, first_rebalance_date=first_rebalance_date,
                          latest_rebalance_date=latest_rebalance_date, benchmark=strategy_config.stocklist.benchmark,
-                         **strategy_config.__dict__)
+                         industry_neutral=industry_neutral, industry_class=industry_class, **strategy_config.__dict__)
         os.chdir(cwd)
 
     # 更新策略股票持仓
-    def update_stocks(self, strategy_name, start, end):
+    def update_stocks(self, start, end, strategy_name=None, strategy_id=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        module_path = os.path.join(self._strategy_path, strategy_name+'/update/update.py')
+        update = import_module('update', module_path)
+        update.update(start, end)
+        self.refresh_stocks(strategy_name)
         return
+
+    # 刷新股票列表
+    def refresh_stocks(self, strategy_name=None, strategy_id=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        stocklistname = self.strategy_stocklist(strategy_name=strategy_name)['stocklist_name']
+        src = os.path.join(self._strategy_path, strategy_name+'/%s.csv'%stocklistname)
+        shutil.copy(src, os.path.join(self._stocklist_path, stocklistname+'.csv'))
+        max_rebalance_date = self._stocklist_manager.max_rebalance_date(stocklistname)
+        min_rebalance_date = self._stocklist_manager.min_rebalance_date(stocklistname)
+        if strategy_id is None:
+            strategy_id = self.strategy_id(strategy_name)
+        self.modify_attributes(strategy_id, latest_rebalance_date=max_rebalance_date,
+                               first_rebalance_date=min_rebalance_date)
 
     # 更改策略属性
     def modify_attributes(self, strategy_id, **kwargs):
@@ -170,9 +204,32 @@ class StrategyManager(object):
         os.chdir(cwd)
         return
 
+    # 运行回测
+    def run_backtest(self, start, end, strategy_id=None, strategy_name=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        cwd = os.getcwd()
+        os.chdir(os.path.join(self._strategy_path, strategy_name))
+        if not os.path.isdir('backtest'):
+            from scripts import strategy_bttest_templates
+            src = strategy_bttest_templates.__path__.__dict__['_path'][-1]
+            shutil.copytree(src, os.getcwd()+'/backtest')
+            # os.rename('strategy_bttest_templates', 'backtest')
+        stocklist_path = self._stocklist_manager.get_path(
+            self.strategy_stocklist(strategy_name=strategy_name)['stocklist_name'])
+        script = os.path.abspath('./backtest/run.py')
+        start = datetime.strptime(start, '%Y%m%d').strftime('%Y-%m-%d')
+        end = datetime.strptime(end, '%Y%m%d').strftime('%Y-%m-%d')
+        os.system("python %s -s %s -e %s -f %s" % (script, start, end, stocklist_path))
+        os.chdir(cwd)
+
 
 if __name__ == '__main__':
     sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
     # sm.delete(name="GMTB")
     # sm.create_from_directory('D:/data/factor_investment_temp_strategies/GMTB')
-    sm.generate_tradeorder(1, 1000000000)
+    # sm.generate_tradeorder(1, 1000000000)
+    sm.run_backtest('20170809', '20170809', strategy_id=1)
+    # sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴业风格_价值")
+    # sm.update_stocks('20070101', '20170731', strategy_name='兴业风格_价值')
+    # sm.modify_attributes(1, first_rebalance_date=datetime(2007,1,31))

@@ -1,4 +1,5 @@
 from pandas import datetime as pdDateTime
+import pandas as pd
 
 
 # 获取某个日期序列的每月最后一天序列
@@ -135,3 +136,23 @@ def DateStr2Datetime(date_str):
         return pdDateTime(int(date_str[0:4]),int(date_str[4:6]),int(date_str[6:8]))
     except:
         return None
+
+def GetDatetimeLastDayOfMonth(idx_datetime):
+    s = pd.Series(idx_datetime, index=idx_datetime)
+    lastdays = s.groupby(pd.TimeGrouper(freq='M')).max()
+    return pd.DatetimeIndex(lastdays, name='date')
+
+def GetDatetimeLastDayOfWeek(idx_datetime):
+    s = pd.Series(idx_datetime, index=idx_datetime)
+    lastdays = s.groupby(pd.TimeGrouper(freq='W')).max()
+    return pd.DatetimeIndex(lastdays, name='date')
+
+def GetDatetimeLastDayOfYear(idx_datetime):
+    s = pd.Series(idx_datetime, index=idx_datetime)
+    lastdays = s.groupby(pd.TimeGrouper(freq='A')).max()
+    return pd.DatetimeIndex(lastdays, name='date')
+
+def GetDatetimeLastDay(idx_datetime, freq):
+    s = pd.Series(idx_datetime, index=idx_datetime)
+    lastdays = s.groupby(pd.TimeGrouper(freq=freq)).max()
+    return pd.DatetimeIndex(lastdays, name='date')

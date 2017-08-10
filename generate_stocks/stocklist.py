@@ -47,8 +47,7 @@ def typical(factor, name, direction=None, industry_neutral=True, benchmark=None,
         else:
             stocks = factor_data[factor_data[name] <= factor_data['quantile_value']]
         stock_counts_per_date = stocks.groupby('date')['IDs'].count()
-        stocks = stocks.set_index(['date', 'IDs'])
-        stocks['Weight'] = 1 / stock_counts_per_date
+        stocks = stocks.join(1 / stock_counts_per_date.rename('Weight'), on='date').set_index(['date', 'IDs'])
     return stocks[['Weight']]
 
 

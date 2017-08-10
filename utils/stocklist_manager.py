@@ -40,3 +40,10 @@ class StockListManager(object):
         f = open(os.path.join(self._stocklist_path, name+'.csv'))
         return pd.read_csv(f).loc[max_date]
 
+    # 股票列表的绝对路径
+    def get_path(self, name):
+        name = name.replace('.csv', '')
+        if self.check_file_exists(name):
+            return os.path.join(self._stocklist_path, name+'.csv')
+        else:
+            return

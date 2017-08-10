@@ -108,6 +108,9 @@ def _adjust_date_axis(ax, date_seq):
     tick_labels = [""] * len(date_seq)
     show = 6
     step = int(len(date_seq) / show)
+    while step == 0:
+        show -= 1
+        step = int(len(date_seq) / show)
     try:
         tick_labels[::step] = [x.to_pydatetime().strftime("%Y%m") for x in date_seq[::step]]
     except:

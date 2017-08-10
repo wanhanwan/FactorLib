@@ -13,21 +13,24 @@ import importlib.util as ilu
 def dict_reverse(_dict):
     return {_dict[x]:x for x in _dict}
 
+
 def parse_industry(industry):
     if industry[:2] == '中信':
         return INDUSTRY_NAME_DICT['中信一级']
     else:
         return INDUSTRY_NAME_DICT['申万一级']
 
+
 def anti_parse_industry(industry):
     return dict_reverse(INDUSTRY_NAME_DICT)[industry]
 
-def write_df_to_excel(sheet,start_point,df,index=True,columns=True):
+
+def write_df_to_excel(sheet, start_point, df, index=True, columns=True):
     if index:
         df = df.reset_index()
     df_shape = df.shape
     if columns:
-        for i,x in enumerate(df.columns):
+        for i, x in enumerate(df.columns):
             _ = sheet.cell(column=start_point[1]+i,row=start_point[0],
                            value=x)
         start_point = (start_point[0]+1,start_point[1])
@@ -35,18 +38,26 @@ def write_df_to_excel(sheet,start_point,df,index=True,columns=True):
         for c in range(df_shape[1]):
             col = start_point[1] + c
             row = start_point[0] + r
-            _ = sheet.cell(column=col,row=row,value=df.iloc[r,c])
-    end_point = (start_point[0]+ df_shape[0]-1,start_point[1]+ df_shape[1]-1)
+            _ = sheet.cell(column=col, row=row, value=df.iloc[r, c])
+            if isinstance(df.iloc[r, c], (int, float)):
+                _.number_format = '0.000'
+            elif isinstance(df.iloc[r, c], pd.Timestamp):
+                _.number_format = 'yyyy/mm/dd'
+    end_point = (start_point[0] + df_shape[0]-1, start_point[1] + df_shape[1]-1)
     return end_point
+
 
 def tradecode_to_windcode(tradecode):
     return tradecode + '.SH' if tradecode[0] == '6' else tradecode + '.SZ'
-        
+
+
 def windcode_to_tradecode(windcode):
     return windcode[:6]
 
+
 def drop_patch(code):
     return code.split(".")[0]
+
 
 def import_mod(mod_name):
     try:
@@ -55,17 +66,20 @@ def import_mod(mod_name):
     except Exception as e:
         return None
 
+
 def import_module(module_name, module_path):
     spec = ilu.spec_from_file_location(module_name, module_path)
     m = ilu.module_from_spec(spec)
     spec.loader.exec_module(m)
     return m
 
+
 def ensure_dir_exists(dir_path):
     import os
     if not os.path.isdir(dir_path):
         os.mkdir(dir_path)
     return dir_path
+
 
 def get_industry_names(industry_symbol, industry_info):
     if industry_symbol == 'sw_level_1':
@@ -86,6 +100,7 @@ def get_industry_names(industry_symbol, industry_info):
         series = level_2_dict.set_index('Code').rename(columns={'Name': industry_symbol})        
     industry_info.columns = ['industry_code']
     return industry_info.join(series, on='industry_code', how='left')[[industry_symbol]]
+
 
 def get_industry_code(industry_symbol, industry_info):
     if industry_symbol in ['sw_level_2', 'cs_level_2']:
@@ -113,6 +128,7 @@ def get_industry_code(industry_symbol, industry_info):
         industry_info[industry_symbol] = industry_info[industry_symbol].str[2:].astype('int32')
         return industry_info[[industry_symbol]]        
 
+
 # 将某报告期回溯N期
 def RollBackNPeriod(report_date, n_period):
     Date = report_date
@@ -126,6 +142,7 @@ def RollBackNPeriod(report_date, n_period):
         elif Date[-4:]=='0331':
             Date = str(int(Date[0:4])-1)+'1231'
     return Date
+
 
 # 在一个日期区间中可能发布的财务报告的报告期
 def ReportDateAvailable(start_date, end_date):
@@ -141,12 +158,14 @@ def ReportDateAvailable(start_date, end_date):
     report_dates = pd.date_range(_(start_date), _(end_date), freq='Q')
     return report_dates.strftime("%Y%m%d")
 
+
 # 对财务数据进行重新索引
 def financial_data_reindex(data, idx):
     idx2 = idx.reset_index(level=1)
     idx2.index = pd.DatetimeIndex(idx2.index)
     new_data = idx2.join(data, on=['max_report_date', 'IDs'])
     return new_data.set_index('IDs', append=True)
+
 
 # 某个时间区间内的所有报告期(季度)
 def get_all_report_periods(start, end):
