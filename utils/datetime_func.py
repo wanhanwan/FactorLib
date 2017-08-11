@@ -140,19 +140,19 @@ def DateStr2Datetime(date_str):
 def GetDatetimeLastDayOfMonth(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq='M')).max()
-    return pd.DatetimeIndex(lastdays, name='date')
+    return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()
 
 def GetDatetimeLastDayOfWeek(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
-    lastdays = s.groupby(pd.TimeGrouper(freq='W')).max()
-    return pd.DatetimeIndex(lastdays, name='date')
+    lastdays = s.groupby(pd.TimeGrouper(freq='W')).max().dropna()
+    return pd.DatetimeIndex(lastdays, name='date').drop_duplicates()
 
 def GetDatetimeLastDayOfYear(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq='A')).max()
-    return pd.DatetimeIndex(lastdays, name='date')
+    return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()
 
 def GetDatetimeLastDay(idx_datetime, freq):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq=freq)).max()
-    return pd.DatetimeIndex(lastdays, name='date')
+    return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()

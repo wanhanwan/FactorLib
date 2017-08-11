@@ -5,6 +5,7 @@ from datetime import datetime
 from data_source import tc
 from data_source.wind_plugin import realtime_quote, get_history_bar
 from utils.tool_funcs import windcode_to_tradecode, import_module
+from factor_performance.analyzer import Analyzer
 import pandas as pd
 import numpy as np
 import os
@@ -31,11 +32,22 @@ class StrategyManager(object):
         if not os.path.isfile(os.path.join(self._strategy_path, 'summary.csv')):
             self._strategy_dict = pd.DataFrame(columns=self.fields)
             self._strategy_dict.to_csv(os.path.join(self._strategy_path, 'summary.csv'), index=False)
-        self._strategy_dict = pd.read_csv(os.path.join(self._strategy_path, 'summary.csv'), encoding='GBK')
+        self._strategy_dict = pd.read_csv(os.path.join(self._strategy_path, 'summary.csv'), encoding='GBK',
+                                          converters={'benchmark': str})
 
     # 保存信息
     def _save(self):
         self._strategy_dict.to_csv(os.path.join(self._strategy_path, 'summary.csv'), index=False, quoting=3)
+
+    def performance_analyser(self, strategy_name=None, strategy_id=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        benchmark_name = self.get_attribute('benchmark', strategy_name=strategy_name).zfill(6)
+        pkl_file = os.path.join(self._strategy_path, strategy_name+'/backtest/BTresult.pkl')
+        if os.path.isfile(pkl_file):
+            return Analyzer(pkl_file, benchmark_name)
+        else:
+            return
 
     # 最大策略ID
     @property
@@ -142,6 +154,12 @@ class StrategyManager(object):
                 self._strategy_dict.loc[self._strategy_dict.id == strategy_id, k] = v
         self._save()
 
+    # 获取属性值
+    def get_attribute(self, attr, strategy_name=None, strategy_id=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        return self._strategy_dict.loc[self._strategy_dict.name==strategy_name, attr].iloc[0]
+
     # 添加一条记录
     def _add_record(self, **kwargs):
         record = pd.DataFrame([[None]*len(self.fields)], columns=self.fields)
@@ -200,7 +218,7 @@ class StrategyManager(object):
         strategy_name = self.strategy_name(strategy_id)
         cwd = os.getcwd()
         os.chdir(os.path.join(self._strategy_path, strategy_name))
-        tradeorders[['股票代码','手数']].to_excel('权重文件.xlsx', index=False, float_format='%.4f')
+        tradeorders[['股票代码', '手数']].to_excel('权重文件.xlsx', index=False, float_format='%.4f')
         os.chdir(cwd)
         return
 
@@ -221,15 +239,26 @@ class StrategyManager(object):
         start = datetime.strptime(start, '%Y%m%d').strftime('%Y-%m-%d')
         end = datetime.strptime(end, '%Y%m%d').strftime('%Y-%m-%d')
         os.system("python %s -s %s -e %s -f %s" % (script, start, end, stocklist_path))
+        self.analyze_return(strategy_name)
         os.chdir(cwd)
 
+    # 收益分析
+    def analyze_return(self, strategy_name=None, strategy_id=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        cwd = os.getcwd()
+        os.chdir(os.path.join(self._strategy_path, strategy_name+'/backtest'))
+        analyzer = self.performance_analyser(strategy_name=strategy_name)
+        if analyzer is not None:
+            analyzer.returns_sheet.to_csv("returns_sheet.csv", index=False, float_format='%.4f')
+        os.chdir(cwd)
 
 if __name__ == '__main__':
     sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
     # sm.delete(name="GMTB")
     # sm.create_from_directory('D:/data/factor_investment_temp_strategies/GMTB')
     # sm.generate_tradeorder(1, 1000000000)
-    sm.run_backtest('20170809', '20170809', strategy_id=1)
-    # sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴业风格_价值")
-    # sm.update_stocks('20070101', '20170731', strategy_name='兴业风格_价值')
+    # sm.run_backtest('20070131', '20170808', strategy_id=2)
+    # sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴业风格_价值成长等权")
+    # sm.update_stocks('20070101', '20170731', strategy_name='兴业风格_价值成长等权')
     # sm.modify_attributes(1, first_rebalance_date=datetime(2007,1,31))

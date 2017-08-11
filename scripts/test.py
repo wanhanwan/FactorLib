@@ -1,14 +1,11 @@
-import numpy as np
+import os
+from utils.strategy_manager import StrategyManager
 
-records_array = np.array([1, 2, 3, 1, 1, 3, 4, 3, 2])
-idx_sort = np.argsort(records_array)
-sorted_records_array = records_array[idx_sort]
-vals, idx_start, count = np.unique(sorted_records_array, return_counts=True,
-                                return_index=True)
 
-# sets of indices
-res = np.split(idx_sort, idx_start[1:])
-#filter them with respect to their size, keeping only items occurring more than once
-
-vals = vals[count > 1]
-res = filter(lambda x: x.size > 1, res)
+sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
+os.chdir(r"D:\data\factor_investment_temp_strategies")
+# for f in [x for x in os.listdir('.') if x in ['兴业风格_价值成长等权', '兴业风格_VGS_TB']]:
+#     # sm.create_from_directory(os.path.abspath(f))
+#     # sm.update_stocks('20070101', '20170731', strategy_name=f)
+#     sm.run_backtest('20070131', '20170808', strategy_name=f)
+sm.run_backtest('20070131', '20170808', strategy_name='兴业风格_情绪')

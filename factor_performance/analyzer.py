@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
-import pyfolio as pf
 import os
 from empyrical import stats
 from data_source import data_source
+from functools import partial
+from datetime import datetime
+from pandas.tseries.offsets import MonthBegin, QuarterBegin, YearBegin
 from utils.datetime_func import (GetDatetimeLastDayOfMonth,
                                  GetDatetimeLastDayOfYear,
                                  GetDatetimeLastDayOfWeek,
@@ -14,8 +16,8 @@ class Analyzer(object):
     def __init__(self, pkl_path, benchmark_name):
         self.rootdir = os.path.dirname(pkl_path)
         self.table = pd.read_pickle(pkl_path)
-        self.benchmark_return = self._return_of_benchmark(benchmark_name)
         self.portfolio_return = self._return_of_portfolio
+        self.benchmark_return = self._return_of_benchmark(benchmark_name)
         self.active_return = stats._adjust_returns(self.portfolio_return, self.benchmark_return)
 
     @property
@@ -26,11 +28,11 @@ class Analyzer(object):
 
     def _return_of_benchmark(self, name):
         try:
-            ret = data_source.load_factor('daily_returns_%', '/indexprices/', ids=[self.benchmark_return.name]) / 100
+            ret = data_source.load_factor('daily_returns_%', '/indexprices/', ids=[name]) / 100
         except Exception as e:
             print(e)
             return pd.Series(np.zeros(len(self.portfolio_return)), index=self.portfolio_return.index, name=name)
-        return ret.reset_index(level=1, drop=True)['daily_returns_%'].rename(name)
+        return ret.reset_index(level=1, drop=True)['daily_returns_%'].reindex(self.portfolio_return.index).rename(name)
 
     def resample_active_return_of(self, frequence):
         idx = GetDatetimeLastDay(self.portfolio_return, freq=frequence)
@@ -41,10 +43,18 @@ class Analyzer(object):
         return active_return
 
     def resample_portfolio_return(self, frequence):
-        return self.portfolio_return.groupby(pd.TimeGrouper(freq=frequence)).agg(stats.cum_returns_final)
+        return self.portfolio_return.groupby(pd.TimeGrouper(freq=frequence)).agg(stats.cum_returns_final).dropna()
 
     def resample_benchmark_return(self, frequence):
-        return self.benchmark_return.groupby(pd.TimeGrouper(freq=frequence)).agg(stats.cum_returns_final)
+        return self.benchmark_return.groupby(pd.TimeGrouper(freq=frequence)).agg(stats.cum_returns_final).dropna()
+
+    @property
+    def abs_nav(self):
+        return (1 + self.portfolio_return).cumprod()
+
+    @property
+    def rel_nav(self):
+        return (1 + self.active_return).cumprod()
 
     @property
     def abs_annual_return(self):
@@ -52,7 +62,15 @@ class Analyzer(object):
 
     @property
     def rel_annual_return(self):
-        return stats.annual_return(self.active_return)
+        return stats.annual_return(self.portfolio_return) - stats.annual_return(self.benchmark_return)
+
+    @property
+    def abs_total_return(self):
+        return stats.cum_returns_final(self.portfolio_return)
+
+    @property
+    def rel_total_return(self):
+        return stats.cum_returns_final(self.active_return) - stats.cum_returns_final(self.benchmark_return)
 
     @property
     def abs_annual_volatility(self):
@@ -71,7 +89,7 @@ class Analyzer(object):
         return stats.sharpe_ratio(self.active_return, simple_interest=True)
 
     @property
-    def abs_maxdrawndown(self):
+    def abs_maxdrawdown(self):
         return stats.max_drawdown(self.portfolio_return)
 
     @property
@@ -81,95 +99,134 @@ class Analyzer(object):
     @property
     def abs_weekly_performance(self):
         idx = GetDatetimeLastDayOfWeek(self.portfolio_return.index)
-        gfunc = [lambda x:x.year, lambda x:x.isocalendar()[1]]
-        df = self.portfolio_return.groupby(gfunc).agg(stats.cum_returns_final).rename(columns=['weekly_return'])
+        gfunc = [lambda x: x.isocalendar()[0], lambda x: x.isocalendar()[1]]
+        df = self.portfolio_return.groupby(gfunc).agg(stats.cum_returns_final).rename('weekly_return')
         df.index = idx
         return df
 
     @property
     def rel_weekly_performance(self):
         idx = GetDatetimeLastDayOfWeek(self.benchmark_return.index)
-        gfunc = [lambda x:x.year, lambda x:x.isocalendar()[1]]
-        df = self.benchmark_return.groupby(gfunc).agg(stats.cum_returns_final).rename(columns=['weekly_return'])
+        gfunc = [lambda x: x.isocalendar()[0], lambda x: x.isocalendar()[1]]
+        df = self.benchmark_return.groupby(gfunc).agg(stats.cum_returns_final).rename('weekly_return')
         df.index = idx
         return self.abs_weekly_performance - df
 
     @property
     def abs_monthly_performance(self):
-        idx = GetDatetimeLastDayOfMonth(self.portfolio_return)
-        gfunc = [lambda x: x.year, lambda x: x.month]
-        df = self.portfolio_return.groupby(gfunc)['protfolio_return'].agg(
-            [
-                lambda x: stats.cum_returns_final(x) - stats.cum_returns_final(self.benchmark_return.reindex(x.index)),
-                lambda x: np.std(x, ddof=1) * 20 ** 0.5,
-                lambda x: stats.win_rate(x, self.benchmark_return, 'weekly'),
-                lambda x: stats.win_rate(x, self.benchmark_return, 'daily')]
-            ).rename(columns=['cum_return', 'volatility', 'weekly_win_rate', 'daily_win_rate'])
+        idx = GetDatetimeLastDayOfMonth(self.portfolio_return.index)
+        gfunc = [lambda x: x.isocalendar()[0], lambda x: x.isocalendar()[1]]
+        df = self.portfolio_return.groupby(gfunc).agg(
+            {
+                'cum_return': (lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)) -
+                                         stats.cum_returns_final(self.benchmark_return.reindex(x.index))),
+                'volatility': lambda x: np.std(x, ddof=1) * 20 ** 0.5,
+                'weekly_win_rate': lambda x: stats.win_rate(x, self.benchmark_return, 'weekly'),
+                'daily_win_rate': lambda x: stats.win_rate(x, self.benchmark_return, 'daily')
+            }
+        )
         df.index = idx
         return df
 
     @property
     def rel_monthly_performance(self):
-        idx = GetDatetimeLastDayOfMonth(self.active_return)
+        idx = GetDatetimeLastDayOfMonth(self.active_return.index)
         gfunc = [lambda x: x.year, lambda x: x.month]
-        df = self.active_return.groupby(gfunc)['active_return'].agg(
-            [
-                lambda x: stats.cum_returns_final(x) - stats.cum_returns_final(self.benchmark_return.reindex(x.index)),
-                lambda x: np.std(x, ddof=1) * 20 ** 0.5,
-                lambda x: stats.win_rate(x, 0, 'weekly'),
-                lambda x: stats.win_rate(x, 0, 'daily')]
-        ).rename(columns=['cum_return', 'volatility', 'weekly_win_rate', 'daily_win_rate'])
+        df = self.active_return.groupby(gfunc).agg(
+            {
+                'cum_return': (lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)) -
+                                         stats.cum_returns_final(self.benchmark_return.reindex(x.index))),
+                'volatility': lambda x: np.std(x, ddof=1) * 20 ** 0.5,
+                'weekly_win_rate': lambda x: stats.win_rate(x, 0, 'weekly'),
+                'daily_win_rate': lambda x: stats.win_rate(x, 0, 'daily')
+            }
+        )
         df.index = idx
         return df
 
     @property
     def abs_yearly_performance(self):
-        idx = GetDatetimeLastDayOfYear(self.portfolio_return)
-        gfunc = lambda x:x.year
+        idx = GetDatetimeLastDayOfYear(self.portfolio_return.index)
+        gfunc = lambda x: x.year
         df = self.portfolio_return.groupby(gfunc).agg(
-            [
-                lambda x: stats.cum_returns_final(x) - stats.cum_returns_final(self.benchmark_return.reindex(x.index)),
-                lambda x: np.std(x, ddof=1) * 250 ** 0.5,
-                lambda x: stats.sharpe_ratio(x, simple_interest=True),
-                stats.max_drawdown,
-                lambda x: stats.information_ratio(x, self.benchmark_return),
-                lambda x: stats.win_rate(x, self.benchmark_return, 'monthly'),
-                lambda x: stats.win_rate(x, self.benchmark_return, 'weekly'),
-                lambda x: stats.win_rate(x, self.benchmark_return, 'daily'),
-            ]
-        ).rename(columns=['cum_return', 'volatility', 'sharp_ratio', 'maxdd',
-                          'IR', 'monthly_win_rate', 'weekly_win_rate', 'daily_win_rate'])
+            {
+                'cum_return': (lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)) -
+                                         stats.cum_returns_final(self.benchmark_return.reindex(x.index))),
+                'volatility': lambda x: np.std(x, ddof=1) * 250 ** 0.5,
+                'sharp_ratio': lambda x: stats.sharpe_ratio(x, simple_interest=True),
+                'maxdd': stats.max_drawdown,
+                'IR': lambda x: stats.information_ratio(x, self.benchmark_return),
+                'monthly_win_rate': lambda x: stats.win_rate(x, self.benchmark_return, 'monthly'),
+                'weekly_win_rate': lambda x: stats.win_rate(x, self.benchmark_return, 'weekly'),
+                'daily_win_rate': lambda x: stats.win_rate(x, self.benchmark_return, 'daily')
+            }
+        )
         df.index = idx
         return df
 
     @property
     def rel_yearly_performance(self):
-        idx = GetDatetimeLastDayOfYear(self.active_return)
-        gfunc = lambda x:x.year
+        idx = GetDatetimeLastDayOfYear(self.active_return.index)
+        gfunc = lambda x: x.year
         df = self.active_return.groupby(gfunc).agg(
-            [
-                lambda x: stats.cum_returns_final(x) - stats.cum_returns_final(self.benchmark_return.reindex(x.index)),
-                lambda x: np.std(x, ddof=1) * 250 ** 0.5,
-                lambda x: stats.sharpe_ratio(x, simple_interest=True),
-                stats.max_drawdown,
-                lambda x: stats.information_ratio(x, 0),
-                lambda x: stats.win_rate(x, 0, 'monthly'),
-                lambda x: stats.win_rate(x, 0, 'weekly'),
-                lambda x: stats.win_rate(x, 0, 'daily'),
-            ]
-        ).rename(columns=['cum_return', 'volatility', 'sharp_ratio', 'maxdd',
-                          'IR', 'monthly_win_rate', 'weekly_win_rate', 'daily_win_rate'])
+            {
+                'cum_return': (lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)) -
+                                         stats.cum_returns_final(self.benchmark_return.reindex(x.index))),
+                'volatility': lambda x: np.std(x, ddof=1) * 250 ** 0.5,
+                'sharp_ratio': lambda x: stats.sharpe_ratio(x, simple_interest=True),
+                'maxdd':stats.max_drawdown,
+                'IR':partial(stats.information_ratio, factor_returns=0),
+                'monthly_win_rate': partial(stats.win_rate, factor_returns=0, period='monthly'),
+                'weekly_win_rate': partial(stats.win_rate, factor_returns=0, period='weekly'),
+                'daily_win_rate': partial(stats.win_rate, factor_returns=0, period='daily')
+            }
+        )
         df.index = idx
         return df
 
     def range_pct(self, start, end, rel=True):
-        if rel:
-            return stats.cum_returns_final(self.active_return.loc[start:end])
-        else:
-            return stats.cum_returns_final(self.portfolio_return.loc[start:end])
+        try:
+            if rel:
+                return stats.cum_returns_final(self.active_return.loc[start:end])
+            else:
+                return stats.cum_returns_final(self.portfolio_return.loc[start:end])
+        except:
+            return np.nan
+
+    def range_maxdrawdown(self, start, end, rel=True):
+        try:
+            if rel:
+                return stats.max_drawdown(self.active_return.loc[start:end])
+            else:
+                return stats.max_drawdown(self.portfolio_return.loc[start:end])
+        except:
+            return np.nan
 
     def portfolio_weights(self, date):
-        return
+        weight = (self.table['stock_positions'].loc[date, 'market_value'] /
+                  self.table['stock_account'].loc[date, 'total_value']).to_frame('Weight')
+        weight['IDs'] = self.table['stock_positions'].loc[date, 'order_book_id'].str[:6]
+        return weight.set_index('IDs', append=True)
+
+    @property
+    def returns_sheet(self):
+        cur_day = data_source.trade_calendar.latest_trade_day(pd.to_datetime(datetime.today().date()))
+        dates = [
+                    cur_day,
+                    cur_day.to_period('W').start_time,
+                    cur_day + MonthBegin(-1),
+                    cur_day + QuarterBegin(-1),
+                    cur_day + MonthBegin(-6),
+                    cur_day + YearBegin(-1),
+                    cur_day + YearBegin(-2)
+                ]
+        returns = list(map(lambda x: self.range_pct(x, cur_day), dates)) + \
+                  [self.rel_annual_return, self.rel_total_return]
+        return pd.DataFrame([returns], columns=['日回报', '本周以来', '本月以来', '本季以来', '近6个月', '今年以来',
+                                                '近两年', '年化回报', '成立以来'])
 
 
-
+if __name__ == '__main__':
+    analyzer = Analyzer(r"D:\data\factor_investment_strategies\兴业风格_价值\backtest\BTresult.pkl",
+                        benchmark_name='000905')
+    ret = analyzer.returns_sheet
