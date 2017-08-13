@@ -210,7 +210,7 @@ class Analyzer(object):
 
     @property
     def returns_sheet(self):
-        cur_day = data_source.trade_calendar.latest_trade_day(pd.to_datetime(datetime.today().date()))
+        cur_day = pd.to_datetime(data_source.trade_calendar.get_latest_trade_days(datetime.today().strftime("%Y%m%d")))
         dates = [
                     cur_day,
                     cur_day.to_period('W').start_time,

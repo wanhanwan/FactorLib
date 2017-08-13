@@ -253,6 +253,16 @@ class StrategyManager(object):
             analyzer.returns_sheet.to_csv("returns_sheet.csv", index=False, float_format='%.4f')
         os.chdir(cwd)
 
+    # back up
+    def backup(self):
+        from filemanager import zip_dir
+        mtime = datetime.fromtimestamp(os.path.getmtime(self._strategy_path)).strftime("%Y%m%d")
+        cwd = os.getcwd()
+        os.chdir(self._strategy_path)
+        zip_dir(self._strategy_path, "copy_of_%s_%s.zip"%(os.path.split(self._strategy_path)[1], mtime))
+        os.chdir(cwd)
+
+
 if __name__ == '__main__':
     sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
     # sm.delete(name="GMTB")
@@ -262,3 +272,4 @@ if __name__ == '__main__':
     # sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴业风格_价值成长等权")
     # sm.update_stocks('20070101', '20170731', strategy_name='兴业风格_价值成长等权')
     # sm.modify_attributes(1, first_rebalance_date=datetime(2007,1,31))
+    sm.analyze_return(strategy_name='兴业风格_成长')
