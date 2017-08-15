@@ -165,9 +165,16 @@ class H5DB(object):
             zip_dir(target_path, os.path.join(self.snapshots_path, '%s_%s.zip'%(date_now, zipname)))
         if mail:
             from QuantLib import mymail
+            mymail.connect()
+            mymail.login()
             content = "hello everyone, this is factor data on %s"%date_now
             attachment = os.path.join(self.snapshots_path, '%s_%s.zip'%(date_now, zipname))
-            mymail.send_mail("base factor data on %s"%date_now, content, {attachment})
+            try:
+                mymail.send_mail("base factor data on %s"%date_now, content, {attachment})
+            except:
+                mymail.connect()
+                mymail.send_mail("base factor data on %s" % date_now, content, {attachment})
+            mymail.quit()
 
     def read_snapshot(self, name):
         snapshotzip = self.snapshots_path+"/%s"%name

@@ -31,8 +31,10 @@ def write_df_to_excel(sheet, start_point, df, index=True, columns=True):
     df_shape = df.shape
     if columns:
         for i, x in enumerate(df.columns):
-            _ = sheet.cell(column=start_point[1]+i,row=start_point[0],
+            _ = sheet.cell(column=start_point[1]+i, row=start_point[0],
                            value=x)
+            if isinstance(x, pd.Timestamp):
+                _.number_format = 'yyyy/mm/dd'
         start_point = (start_point[0]+1,start_point[1])
     for r in range(df_shape[0]):
         for c in range(df_shape[1]):
@@ -77,7 +79,7 @@ def import_module(module_name, module_path):
 def ensure_dir_exists(dir_path):
     import os
     if not os.path.isdir(dir_path):
-        os.mkdir(dir_path)
+        os.makedirs(dir_path)
     return dir_path
 
 
@@ -97,7 +99,7 @@ def get_industry_names(industry_symbol, industry_info):
         level_2_excel = os.path.abspath(os.path.abspath("..") +'/..') + os.sep + "resource" + os.sep + "level_2_industry_dict.xlsx"
         level_2_dict = pd.read_excel(level_2_excel, sheetname=industry_symbol, header=0)
         level_2_dict['Code'] = level_2_dict['Code'].apply(int)
-        series = level_2_dict.set_index('Code').rename(columns={'Name': industry_symbol})        
+        series = level_2_dict.set_index('Code').rename(columns={'Name': industry_symbol})
     industry_info.columns = ['industry_code']
     return industry_info.join(series, on='industry_code', how='left')[[industry_symbol]]
 
@@ -126,7 +128,7 @@ def get_industry_code(industry_symbol, industry_info):
         industry_info[industry_symbol] = industry_info['industry_code'].map(CS_INDUSTRY_DICT_REVERSE)
         industry_info.dropna(inplace=True)
         industry_info[industry_symbol] = industry_info[industry_symbol].str[2:].astype('int32')
-        return industry_info[[industry_symbol]]        
+        return industry_info[[industry_symbol]]
 
 
 # 将某报告期回溯N期
@@ -171,3 +173,15 @@ def financial_data_reindex(data, idx):
 def get_all_report_periods(start, end):
     periods = pd.date_range(start, end, freq='Q', name='date')
     return periods
+
+
+# 更新dict
+def deep_update_dict(from_dict, to_dict):
+    import collections
+    for (key, value) in from_dict.items():
+        if (key in to_dict.keys() and
+                isinstance(to_dict[key], collections.Mapping) and
+                isinstance(value, collections.Mapping)):
+            deep_update_dict(value, to_dict[key])
+        else:
+            to_dict[key] = value

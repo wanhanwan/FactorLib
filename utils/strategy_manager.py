@@ -2,7 +2,7 @@ from utils.stocklist_manager import StockListManager
 from single_factor_test.config import parse_config
 from utils import AttrDict
 from datetime import datetime
-from data_source import tc
+from data_source import tc, h5
 from data_source.wind_plugin import realtime_quote, get_history_bar
 from utils.tool_funcs import windcode_to_tradecode, import_module
 from factor_performance.analyzer import Analyzer
@@ -249,8 +249,9 @@ class StrategyManager(object):
         cwd = os.getcwd()
         os.chdir(os.path.join(self._strategy_path, strategy_name+'/backtest'))
         analyzer = self.performance_analyser(strategy_name=strategy_name)
+        max_date = self.latest_nav_date(strategy_name=strategy_name)
         if analyzer is not None:
-            analyzer.returns_sheet.to_csv("returns_sheet.csv", index=False, float_format='%.4f')
+            analyzer.returns_sheet(max_date).to_csv("returns_sheet.csv", index=False, float_format='%.4f')
         os.chdir(cwd)
 
     # back up
@@ -261,6 +262,66 @@ class StrategyManager(object):
         os.chdir(self._strategy_path)
         zip_dir(self._strategy_path, "copy_of_%s_%s.zip"%(os.path.split(self._strategy_path)[1], mtime))
         os.chdir(cwd)
+
+    # 最新净值日期
+    def latest_nav_date(self, strategy_id=None, strategy_name=None):
+        if strategy_id is not None:
+            strategy_name = self.strategy_name(strategy_id)
+        if os.path.isfile(os.path.join(self._strategy_path, strategy_name+'/backtest/BTresult.pkl')):
+            pf = pd.read_pickle(os.path.join(self._strategy_path, strategy_name+'/backtest/BTresult.pkl'))
+            return pf['portfolio'].index.max()
+        else:
+            return
+
+
+def update_nav(start, end):
+    sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
+    sm.backup()
+    for i, f in sm._strategy_dict['name'].iteritems():
+        sm.run_backtest(start, end, strategy_name=f)
+    return
+
+
+def collect_nav(mailling=False):
+    from const import CS_INDUSTRY_DICT, MARKET_INDEX_DICT
+    from utils.excel_io import write_xlsx
+    from utils.tool_funcs import ensure_dir_exists
+    df = pd.DataFrame()
+    sm = StrategyManager('D:/data/factor_investment_strategies', 'D:/data/factor_investment_stocklists')
+    for i, f in sm._strategy_dict['name'].iteritems():
+        if os.path.isfile(os.path.join(sm._strategy_path, f+'/backtest/returns_sheet.csv')):
+            date = sm.latest_nav_date(strategy_name=f)
+            ff = open(os.path.join(sm._strategy_path, f+'/backtest/returns_sheet.csv'))
+            returns = pd.read_csv(ff)
+            returns['最新日期'] = date
+            returns.insert(0, '策略名称', f)
+            df = df.append(returns)
+    df = df.set_index('最新日期')
+    maxdate = df.index.max().strftime("%Y%m%d")
+    indexreturns = (h5.load_factor('daily_returns_%', '/indexprices/', dates=[maxdate]) / 100).reset_index()
+    indexreturns.insert(0, 'name', indexreturns['IDs'].map(MARKET_INDEX_DICT))
+    indexreturns = indexreturns.set_index(['date', 'IDs'])
+    industry_returns = (h5.load_factor('changeper', '/indexprices/cs_level_1/', dates=[maxdate]) / 100).reset_index()
+    industry_returns.insert(0, 'name', industry_returns['IDs'].map(CS_INDUSTRY_DICT))
+    industry_returns = industry_returns.set_index(['date', 'IDs'])
+    ensure_dir_exists("D:/data/strategy_performance/%s"%maxdate)
+    write_xlsx("D:/data/strategy_performance/%s/returns_analysis_%s.xlsx"%(maxdate, maxdate),
+               **{'returns': df, 'market index':indexreturns, 'citic industry index':industry_returns})
+    if mailling:
+        from filemanager import zip_dir
+        from QuantLib import mymail
+        mymail.connect()
+        mymail.login()
+        zip_dir("D:/data/strategy_performance/%s"%maxdate, 'D:/data/strategy_performance/%s.zip'%maxdate)
+        content = 'hello everyone, this is strategy report on %s'%maxdate
+        attachment = 'D:/data/strategy_performance/%s.zip'%maxdate
+        try:
+            mymail.send_mail("strategy daily report on %s"%maxdate, content, {attachment})
+        except:
+            mymail.connect()
+            mymail.send_mail("strategy daily report on %s" % maxdate, content, {attachment})
+        mymail.quit()
+    return df
 
 
 if __name__ == '__main__':

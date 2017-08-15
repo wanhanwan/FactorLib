@@ -49,12 +49,16 @@ class trade_calendar(object):
         if n < 0:
             tempData = self.get_trade_days(end_date=today, freq=freq, first_or_last=first_or_last)
             tempData.sort(reverse=True)
+        elif n == 0:
+            tempData = self.get_trade_days(end_date=today, freq=freq, first_or_last=first_or_last)
+            tempData.sort(reverse=True)
+            return tempData[0]
         else:
             tempData = self.get_trade_days(start_date=today, freq=freq, first_or_last=first_or_last)
         if today in tempData:
             return tempData[abs(n)]
         else:
-            return tempData[abs(n) - 1]
+            return tempData[abs(n)-1]
     
     def is_trade_day(self, day):
         if isinstance(day, str):

@@ -65,7 +65,7 @@ def get_stock_industryname(stocks, date, industryid, industrytype):
     return d
 
 def index_weight_panel(dates, index_id):
-    months = (trade_day_offset(x, -1, '1m') for x in dates)
+    months = (trade_day_offset(x, 0, '1m') for x in dates)
     l = []
     for i, m in enumerate(months):
         ids, weight = index_weight(index_id, m)
@@ -174,7 +174,7 @@ def update_trade_status(start, end):
     trade_status = pd.concat([st,suspend,uplimit,downlimit], axis=1)
     trade_status = trade_status.where(pd.isnull(trade_status), other=1)
     trade_status.fillna(0, inplace=True)
-    trade_status.columns = ['st','suspend','uplimit','downlimit']
+    trade_status.columns = ['st', 'suspend', 'uplimit', 'downlimit']
     trade_status['no_trading'] = trade_status.any(axis=1).astype('int32')
     h5.save_factor(trade_status, '/trade_status/')
 
@@ -198,21 +198,13 @@ def _update_data(field, start, end, params=None):
     save_factor(data, '/stock_financial_data/')
 
 
-if __name__ == '__main__':
-    from data_source.wind_financial_data_api import update
-    from run_daily import dailyfactors
+def update_industry_index_prices(start, end):
+    from data_source.update_data.ths_data_source import _updateHistoryBar
+    from const import CS_INDUSTRY_CODES
+    fields = ['open', 'high', 'low', 'close', 'changeper', 'volume']
+    data = _updateHistoryBar(CS_INDUSTRY_CODES, start, end, fields, 1)
+    h5.save_factor(data, '/indexprices/cs_level_1/')
 
-    start = '20170809'
-    end = '20170809'
-    UpdateFuncs = [onlist,
-                   update_price,
-                   update_sector,
-                   update_trade_status,
-                   update_idx_weight,
-                   update_industry_name
-                   ]
-    for iFunc in UpdateFuncs:
-        iFunc(start, end)
-    update.update_all(start, end)
-    dailyfactors(start, end)
-    h5.snapshot(pd.date_range(start, end), 'base_factor', mail=True)
+
+if __name__ == '__main__':
+    update_idx_weight('20070131', '20170814')

@@ -92,8 +92,8 @@ def financial_data(start, end, fields, param_dict, dtypes_dict={}):
 
 
 if __name__ == '__main__':
-    # # 中信一级行业的历史行情数据
-    # fields = ['open', 'high', 'low', 'close', 'changeper', 'volume']
-    # data = _updateHistoryBar(CS_INDUSTRY_CODES, '20160405', '20160405', fields, 1)
-    # h5.save_factor(data, '/indexprices/cs_level_1/')
+    # 中信一级行业的历史行情数据
+    fields = ['open', 'high', 'low', 'close', 'changeper', 'volume']
+    data = _updateHistoryBar(CS_INDUSTRY_CODES, '20170708', '20170813', fields, 1)
+    h5.save_factor(data, '/indexprices/cs_level_1/')
 

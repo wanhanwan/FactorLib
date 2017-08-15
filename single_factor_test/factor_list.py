@@ -101,7 +101,7 @@ StyleMomentumFactor_Momentum_60M = ('StyleMomentumFactor_Momentum_60M', '/XYData
 # StyleFactor
 StyleFactor_GM = ('StyleFactor_GM', '/XYData/StyleFactor/', 1)
 StyleFactor_GrowthFactor = ('StyleFactor_GrowthFactor', '/XYData/StyleFactor/', 1)
-StyleFactor_MomentumFactor = ('StyleFactor_MomentumFactor', '/XYData/StyleFactor/', -1)
+StyleFactor_MomentumFactor = ('StyleFactor_MomentumFactor', '/XYData/StyleFactor/', 1)
 StyleFactor_SentimentFactor = ('StyleFactor_SentimentFactor', '/XYData/StyleFactor/', 1)
 StyleFactor_TB_adjM = ('StyleFactor_TB_adjM', '/XYData/StyleFactor/', 1)
 StyleFactor_TradingBehaviorFactor = ('StyleFactor_TradingBehaviorFactor', '/XYData/StyleFactor/', 1)
@@ -152,5 +152,8 @@ factor_list_style = [StyleFactor_GM, StyleFactor_GrowthFactor, StyleFactor_Momen
                StyleFactor_TB_adjM, StyleFactor_TradingBehaviorFactor, StyleFactor_ValueFactor,StyleFactor_VG,
                StyleFactor_VGS, StyleFactor_VGS_TB, StyleFactor_VGS_TBadjM, StyleFactor_VS]
 
+self_defined = [bp_div_median, ep_div_median, float_mkt_value, six_month_highest_returns,
+               iffr, return_60d, turnover_adjust_total_mkt_value]
+
 factor_list = factor_list_growth + factor_list_momentum + factor_list_quality + factor_list_sentiment + \
-    factor_list_style + factor_list_technical + factor_list_value
+    factor_list_style + factor_list_technical + factor_list_value + self_defined
