@@ -98,7 +98,7 @@ StyleMomentumFactor_Momentum_60M = ('StyleMomentumFactor_Momentum_60M', '/XYData
 # StyleFactor
 StyleFactor_GM = ('StyleFactor_GM', '/XYData/StyleFactor/', 1)
 StyleFactor_GrowthFactor = ('StyleFactor_GrowthFactor', '/XYData/StyleFactor/', 1)
-StyleFactor_MomentumFactor = ('StyleFactor_MomentumFactor', '/XYData/StyleFactor/', -1)
+StyleFactor_MomentumFactor = ('StyleFactor_MomentumFactor', '/XYData/StyleFactor/', 1)
 StyleFactor_SentimentFactor = ('StyleFactor_SentimentFactor', '/XYData/StyleFactor/', 1)
 StyleFactor_TB_adjM = ('StyleFactor_TB_adjM', '/XYData/StyleFactor/', 1)
 StyleFactor_TradingBehaviorFactor = ('StyleFactor_TradingBehaviorFactor', '/XYData/StyleFactor/', 1)
@@ -110,4 +110,4 @@ StyleFactor_VGS_TBadjM = ('StyleFactor_VGS_TBadjM', '/XYData/StyleFactor/', 1)
 StyleFactor_VS = ('StyleFactor_VS', '/XYData/StyleFactor/', 1)
 
 
-factor_list = [StyleFactor_TB_adjM, StyleFactor_SentimentFactor]
+factor_list = [StyleFactor_VG, six_month_highest_returns]

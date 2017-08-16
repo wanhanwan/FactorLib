@@ -72,7 +72,8 @@ class FactorInvestmentStocksGenerator(AbstractStockGenerator):
         dates = data_source.trade_calendar.get_trade_days(start, end, self.config.rebalance_frequence)
         stockpool = funcs._stockpool(self.config.stockpool, dates, self.config.stocks_unable_trade)
         factor_data = funcs._load_factors(self.factors, stockpool)
-        score = getattr(funcs, self.config.scoring_mode.function)(factor_data, method=self.config.scoring_mode.drop_outlier_method)
+        score = getattr(funcs, self.config.scoring_mode.function)(factor_data, industry_name=self.config.stocklist.industry,
+                                                                  method=self.config.scoring_mode.drop_outlier_method)
         total_score = funcs._total_score(score, self.direction, self.config.weight)
         factor_data = factor_data.merge(total_score, left_index=True, right_index=True, how='left')
         self.direction['total_score'] = 1

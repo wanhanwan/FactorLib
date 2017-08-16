@@ -38,12 +38,13 @@ def _standard(factors):
 def score_by_industry(factor_data, industry_name, factor_names=None, **kwargs):
     factor_names = factor_names if factor_names is not None else list(factor_data.columns)
     industry_str = parse_industry(industry_name)
-    all_ids = factor_data['IDs'].unique().tolist()
-    all_dates = factor_data['date'].unique().tolist()
+    all_ids = factor_data.index.get_level_values(1).unique().tolist()
+    all_dates = factor_data.index.get_level_values(0).unique().tolist()
 
     # 个股的行业信息与因子数据匹配
     industry_info = data_source.sector.get_stock_industry_info(
         all_ids, industry=industry_name, dates=all_dates).reset_index()
+    factor_data = factor_data.reset_index()
     factor_data = pd.merge(factor_data, industry_info, how='left')
     score = factor_data.set_index(['date', 'IDs']).groupby(
         industry_str, group_keys=False).apply(ScoringFactors, factors=factor_names, **kwargs)

@@ -171,8 +171,8 @@ class Analyzer(object):
         gfunc = lambda x: x.year
         df = self.active_return.groupby(gfunc).agg(
             {
-                'cum_return': (lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)) -
-                                         stats.cum_returns_final(self.benchmark_return.reindex(x.index))),
+                'cum_return': lambda x: stats.cum_returns_final(self.portfolio_return.reindex(x.index)),
+                'benchmark_return': lambda x: stats.cum_returns_final(self.benchmark_return.reindex(x.index)),
                 'volatility': lambda x: np.std(x, ddof=1) * 250 ** 0.5,
                 'sharp_ratio': lambda x: stats.sharpe_ratio(x, simple_interest=True),
                 'maxdd':stats.max_drawdown,
@@ -182,6 +182,7 @@ class Analyzer(object):
                 'daily_win_rate': partial(stats.win_rate, factor_returns=0, period='daily')
             }
         )
+        df.insert(2, 'active_return', df['cum_return']-df['benchmark_return'])
         df.index = idx
         return df
 
