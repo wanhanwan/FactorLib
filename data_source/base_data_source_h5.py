@@ -162,7 +162,7 @@ class base_data_source(object):
         """获得股票交易状态信息,包括停牌、ST、涨跌停"""
         if dates is None:
             dates = self.trade_calendar.get_trade_days(start_date=start_date,end_date=end_date,freq=freq)
-        elif not isinstance(dates,list):
+        elif not isinstance(dates, list):
             dates = [dates]
         if (start_date not in dates) and (start_date is not None):
             dates.append(start_date)
@@ -174,10 +174,10 @@ class base_data_source(object):
         if not ids:
             return trade_status
         else:
-            if not isinstance(ids,list):
+            if not isinstance(ids, list):
                 ids = [ids]
             idx = pd.MultiIndex.from_product([dates, ids])
-            idx.names = ['date','IDs']
+            idx.names = ['date', 'IDs']
             return trade_status.reindex(idx, fill_value=0)
 
     def get_latest_report(self, field, ids=None, dates=None, start_date=None,
@@ -313,7 +313,7 @@ class sector(object):
             dates = [dates]
         suspend = self.h5DB.load_factor('volume', '/stocks/', dates=dates)
         suspend = suspend.query('volume == 0')
-        return  suspend['volume']
+        return suspend['volume']
 
     def get_uplimit(self, dates=None, start_date=None, end_date=None):
         """某一时间段内涨停的股票"""
@@ -427,6 +427,22 @@ class sector(object):
         stock_name_listdate = stock_name_listdate.reset_index(level=0,drop=True)
 
         stock_members = self.get_stock_industry_info(ids, dates=date).swaplevel()
-        stock_info = pd.merge(stock_members,stock_name_listdate,left_index=True,right_index=True,how='left')
+        stock_info = pd.merge(stock_members,stock_name_listdate,left_index=True, right_index=True,how='left')
         stock_info = stock_info.swaplevel()
         return stock_info
+
+    def get_latest_unst(self, dates, months=6):
+        """获得最近摘帽的公司"""
+        idx = pd.DatetimeIndex(dates, name='date')
+        unst = (self.h5DB.load_factor('unst', '/stocks/').reset_index().
+                drop('unst', axis=1).assign(unst_date=lambda x: x.date).set_index(['date', 'IDs']).
+                unstack().reindex(idx, method='ffill').stack().reset_index())
+        latest_unst = unst[(unst['date']-unst['unst_date'])/pd.to_timedelta(1, unit='M') <= months]
+        latest_unst['unst'] = 1
+        return latest_unst.set_index(['date', 'IDs']).drop('unst_date', axis=1)
+
+
+if __name__ == '__main__':
+    from data_source import data_source
+    data_source.sector.get_latest_unst(dates=['20170403','20170405'], months=6)
+
