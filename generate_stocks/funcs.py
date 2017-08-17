@@ -22,22 +22,6 @@ def _stockpool(sectorid, dates, qualify_method):
     return stockpool._qualify_stocks(raw, qualify_method)
 
 
-def _drop_outlier(factors, method):
-    # 当只有一个因子时，就不需要处理异常值，因为排序都是一样的。
-    if len(factors.columns) == 1:
-        return factors
-    newfactors = factors.apply(lambda x: DropOutlier(
-        x.reset_index(), x.name, method=method, alpha=2)[x.name+'_after_drop_outlier'])
-    newfactors = newfactors.rename(columns=lambda x: x.replace("_after_drop_outlier", ""))
-    return newfactors
-
-
-def _standard(factors):
-    newfactors = factors.apply(lambda x: Standard(x.reset_index(), x.name)[x.name+'_after_standard'])
-    newfactors = newfactors.rename(columns=lambda x: x.replace('_after_standard', ''))
-    return newfactors
-
-
 def score_by_industry(factor_data, industry_name, factor_names=None, **kwargs):
     factor_names = factor_names if factor_names is not None else list(factor_data.columns)
     industry_str = parse_industry(industry_name)
