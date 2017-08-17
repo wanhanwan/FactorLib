@@ -48,9 +48,22 @@ def _calRSquareApplyFunc(data_frame):
     r_square = np.apply_along_axis(_calRSquare, 0, data_frame[:, :-4], data_frame[:, -4:])
     return r_square
 
+
+# 摘帽日期
+def unst(start, end, **kwargs):
+    start = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -1)
+    st = kwargs['data_source'].load_factor('is_st', '/stocks/', start_date=start, end_date=end)
+    st_T = st.unstack()
+    st_shift = st_T.shift(1)
+    unst_stocks = ((st_T - st_shift) == -1).stack().astype('int').rename(columns={'is_st':'unst'})
+    unst_stocks = unst_stocks[unst_stocks.unst==1]
+    if not unst_stocks.empty:
+        kwargs['data_source'].h5DB.save_factor(unst_stocks, '/stocks/')
+
+
 AlternativeFuncListMonthly = []
-AlternativeFuncListDaily = [iffr]
+AlternativeFuncListDaily = [iffr, unst]
 
 if __name__ == '__main__':
     from data_source import data_source
-    iffr('20170701', '20170731', data_source=data_source)
+    unst('20170701', '20170816', data_source=data_source)
