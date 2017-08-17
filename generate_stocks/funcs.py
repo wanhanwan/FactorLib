@@ -23,6 +23,9 @@ def _stockpool(sectorid, dates, qualify_method):
 
 
 def _drop_outlier(factors, method):
+    # 当只有一个因子时，就不需要处理异常值，因为排序都是一样的。
+    if len(factors.columns) == 1:
+        return factors
     newfactors = factors.apply(lambda x: DropOutlier(
         x.reset_index(), x.name, method=method, alpha=2)[x.name+'_after_drop_outlier'])
     newfactors = newfactors.rename(columns=lambda x: x.replace("_after_drop_outlier", ""))
@@ -81,9 +84,7 @@ def _to_factordict(factors):
 
 
 if __name__ == "__main__":
-    dates = data_source.trade_calendar.get_trade_days('20170701', '20170801', '1m')
-    factors = data_source.h5DB.load_factors({'/stocks/':['float_mkt_value']}, dates=dates)
-    score = score_by_industry(factors, '中信一级', method='Mean-Variance')
+    _stockpool('全A', ['20070131'], 'typical')
 
 
 

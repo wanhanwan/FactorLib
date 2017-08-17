@@ -189,10 +189,11 @@ class H5DB(object):
                         data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str}, parse_dates=['date'])
                     except:
                         data = pd.read_csv(os.path.join(dirpath, file), converters={'IDs':str}, encoding="GBK", parse_dates=['date'])
+                    data['IDs'] = data['IDs'].str.zfill(6)
+                    data.set_index(['date', 'IDs'], inplace=True)
                     if data.columns.isin(['list_date', 'backdoordate']).any():
                         data = data.astype('str')
-                    data['IDs'] = data['IDs'].str.zfill(6)
-                    self.save_factor(data.set_index(['date','IDs']), factor_dir)
+                    self.save_factor(data, factor_dir)
 
 
     #-------------------------工具函数-------------------------------------------

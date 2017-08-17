@@ -15,8 +15,8 @@ from single_factor_test.main import run
 import pandas as pd
 import os
 
-latest_update_date_0 = '20170814'
-latest_update_date_1 = '20170814'
+latest_update_date_0 = '20170816'
+latest_update_date_1 = '20170816'
 
 UpdateFuncs = [onlist,
                update_price,

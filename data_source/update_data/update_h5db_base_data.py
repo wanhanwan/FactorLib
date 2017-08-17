@@ -96,14 +96,14 @@ def update_price(start, end):
     # 股票价量数据
     field_names = "收盘价 涨跌幅 最高价 最低价 成交量"
     data = get_history_bar(field_names.split(),start,end,**{'复权方式':'不复权'})
-    data.columns = ['close','daily_returns_%','high','low','vol']
-    data['vol'] = data['vol'] / 100
+    data.columns = ['close','daily_returns_%','high','low','volume']
+    data['volume'] = data['volume'] / 100
     data['daily_returns'] = data['daily_returns_%'] / 100
     h5.save_factor(data,'/stocks/')
 
     field_names = "总市值 A股市值(不含限售股)"
     data = get_history_bar(field_names.split(),start,end)
-    data.columns = ['total_mkt_value','float_mkt_value']
+    data.columns = ['total_mkt_value', 'float_mkt_value']
     data = data / 10000
     h5.save_factor(data,'/stocks/')
 
