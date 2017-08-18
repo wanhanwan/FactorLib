@@ -1,19 +1,34 @@
 import pandas as pd
+from pandas.tseries.offsets import CustomBusinessDay
+from pandas.tseries.offsets import
 import os
 
-from utils.datetime_func import getWeekLastDay,getWeekFirstDay,getMonthFirstDay,getMonthLastDay, Datetime2DateStr
+from utils.datetime_func import getWeekLastDay, getMonthFirstDay, getMonthLastDay, Datetime2DateStr
 from functools import lru_cache
-from datetime import datetime, time
+from datetime import time
+
+
+def __read():
+    allTradeDays = pd.read_csv(
+        os.sep.join(__file__.split(os.sep)[:-2]) + os.sep + 'resource/trade_dates.csv',
+        index_col=0, header=None, squeeze=True, dtype='str').values.tolist()
+    allTradeDays_idx = pd.DatetimeIndex(allTradeDays)
+    all_dates = pd.date_range(min(allTradeDays), max(allTradeDays))
+    holidays = [x for x in all_dates if (x not in allTradeDays_idx) and (x.weekday() not in [5, 6])]
+    return holidays
 
 
 class trade_calendar(object):
-    allTradeDays = pd.read_csv(
-        os.sep.join(__file__.split(os.sep)[:-2])+os.sep+'resource/trade_dates.csv',
-        index_col=0, header=None, squeeze=True, dtype='str').values.tolist()
-    allTradeDays_idx = pd.DatetimeIndex(allTradeDays)
+    def __init__(self):
+        allTradeDays = pd.read_csv(
+            os.sep.join(__file__.split(os.sep)[:-2])+os.sep+'resource/trade_dates.csv',
+            index_col=0, header=None, squeeze=True, dtype='str').values.tolist()
+        allTradeDays_idx = pd.DatetimeIndex(allTradeDays)
+        all_dates = pd.date_range(min(allTradeDays), max(allTradeDays))
+        holidays = [x for x in all_dates if (x not in allTradeDays_idx) and (x.weekday() not in [5, 6])]
+        chn_trade_calendar = CustomBusinessDay(holidays=holidays)
 
-
-    def get_trade_days(self, start_date=None,end_date=None,freq='1d',first_or_last='L'):
+    def get_trade_days(self, start_date=None, end_date=None, freq='1d', first_or_last='L', retstr=True):
         """获得交易日期
         对于freq的计算方式:
         '1d':前面数字表示间隔数目,后面字母表示频率,频率包括(d,w,m,y)

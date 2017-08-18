@@ -17,6 +17,7 @@ float_mkt_value = ('float_mkt_value', '/stocks/', -1)
 # 反转类因子
 six_month_highest_returns = ('six_month_highest_returns', '/stock_reversal/', 1)
 return_60d = ('return_60d', '/stock_momentum/', -1)
+return_25d = ('return_25d', '/stock_momentum/', -1)
 
 # 流动性因子
 turnover_adjust_total_mkt_value = ('turnover_adjust_total_mkt_value', '/stock_liquidity/', -1)

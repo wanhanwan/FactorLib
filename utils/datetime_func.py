@@ -1,4 +1,5 @@
 from pandas import datetime as pdDateTime
+from data_source import tc
 import pandas as pd
 
 
@@ -123,12 +124,14 @@ def Datetime2DateStr(date):
         Day = str(Day)
     return str(Year)+Month+Day
 
+
 # datetime(timestamp)转成数字日期(20120202)
 def Datetime2IntDate(date):
     Year = date.year
     Month = date.month
     Day = date.day
     return Year * 10000 + Month * 100 + Day
+
 
 # 日期字符串(20120202)转成datetime（timestamp），如果不是日期字符串，则返回None
 def DateStr2Datetime(date_str):
@@ -137,22 +140,30 @@ def DateStr2Datetime(date_str):
     except:
         return None
 
+
 def GetDatetimeLastDayOfMonth(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq='M')).max()
     return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()
+
 
 def GetDatetimeLastDayOfWeek(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq='W')).max().dropna()
     return pd.DatetimeIndex(lastdays, name='date').drop_duplicates()
 
+
 def GetDatetimeLastDayOfYear(idx_datetime):
     s = pd.Series(idx_datetime, index=idx_datetime)
     lastdays = s.groupby(pd.TimeGrouper(freq='A')).max()
     return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()
 
-def GetDatetimeLastDay(idx_datetime, freq):
+
+def GetDatetimeLastDay(idx_datetime, freq, use_trading=True):
     s = pd.Series(idx_datetime, index=idx_datetime)
+    if freq.endswith('D') and use_trading:
+        n = int(freq[0])
+        lastdays = s.groupby(pd.TimeGrouper(tc.chn_trade_calendar*n)).max()
+        return pd.DatetimeIndex(lastdays, name='date')
     lastdays = s.groupby(pd.TimeGrouper(freq=freq)).max()
     return pd.DatetimeIndex(lastdays, name='date').dropna().drop_duplicates()

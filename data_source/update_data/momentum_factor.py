@@ -19,7 +19,18 @@ def return_20d(start, end, **kwargs):
     universe = kwargs['data_source'].sector.get_history_ashare(all_dates)
     ids = universe.index.levels[1].unique()
     ret_20d = kwargs['data_source'].get_past_ndays_return(list(ids), 20, start, end)
-    kwargs['data_source'].h5DB.save_factor(ret_20d, '/stock_momentum/')    
+    kwargs['data_source'].h5DB.save_factor(ret_20d, '/stock_momentum/')
 
-MomentumFuncListDaily = [return_5d, return_20d, return_60d]
+def return_25d(start, end, **kwargs):
+    all_dates = kwargs['data_source'].trade_calendar.get_trade_days(start, end)
+    universe = kwargs['data_source'].sector.get_history_ashare(all_dates)
+    ids = universe.index.levels[1].unique()
+    ret_25d = kwargs['data_source'].get_past_ndays_return(list(ids), 25, start, end)
+    kwargs['data_source'].h5DB.save_factor(ret_25d, '/stock_momentum/')
+
+MomentumFuncListDaily = [return_5d, return_20d, return_60d, return_25d]
 MomentumFuncListMonthly = []
+
+if __name__ == '__main__':
+    from data_source import data_source
+    return_25d('20070131', '20170817', data_source=data_source)

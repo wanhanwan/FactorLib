@@ -259,7 +259,7 @@ class StrategyManager(object):
         from filemanager import zip_dir
         mtime = datetime.fromtimestamp(os.path.getmtime(self._strategy_path)).strftime("%Y%m%d")
         cwd = os.getcwd()
-        os.chdir(self._strategy_path)
+        os.chdir(os.path.abspath(self._strategy_path+'/../strategy_backup'))
         zip_dir(self._strategy_path, "copy_of_%s_%s.zip"%(os.path.split(self._strategy_path)[1], mtime))
         os.chdir(cwd)
 
@@ -329,9 +329,9 @@ if __name__ == '__main__':
     # sm.delete(name="GMTB")
     # sm.create_from_directory('D:/data/factor_investment_temp_strategies/GMTB')
     # sm.generate_tradeorder(1, 1000000000)
-    sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴基VG_逆向_行业中性")
-    sm.update_stocks('20070101', '20170731', strategy_name='兴基VG_逆向_行业中性')
-    sm.run_backtest('20070131', '20170815', strategy_name='兴基VG_逆向_行业中性')
+    sm.create_from_directory("D:/data/factor_investment_temp_strategies/兴基反转_25D")
+    sm.update_stocks('20070101', '20170731', strategy_name='兴基反转_25D')
+    sm.run_backtest('20070131', '20170817', strategy_name='兴基反转_25D')
     # sm.run_backtest('20070131', '20170815', strategy_name='兴基VG_逆向')
     # sm.modify_attributes(1, first_rebalance_date=datetime(2007,1,31))
     # sm.analyze_return(strategy_name='兴业风格_成长')

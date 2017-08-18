@@ -2,9 +2,9 @@ import pandas as pd
 import numpy as np
 import os
 
-from const import SW_INDUSTRY_DICT,CS_INDUSTRY_DICT,MARKET_INDEX_DICT
+from const import SW_INDUSTRY_DICT, MARKET_INDEX_DICT
 from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex, windcode_to_tradecode
-from utils.datetime_func import DateStr2Datetime, Datetime2DateStr
+from utils.datetime_func import DateStr2Datetime, GetDatetimeLastDay
 from datetime import timedelta, datetime
 from functools import lru_cache
 
@@ -70,14 +70,14 @@ class base_data_source(object):
             return self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
         elif (start_date is not None) or (end_date is not None):
             dates = self.trade_calendar.get_trade_days(start_date, end_date)
-            return  self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
+            return self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
 
     def get_period_return(self, ids, start_date, end_date, type='stock'):
         """计算证券的区间收益
         区间收益 = 开始日收盘价 / 终止日收盘价 - 1
         返回: Series(index=IDs)
         """
-        prices = self.get_history_price(ids,dates=[start_date,end_date],
+        prices = self.get_history_price(ids,dates=[start_date, end_date],
                                         type=type, adjust=True)
         prices = prices.swaplevel().sort_index().unstack()
         _cum_return_fun = lambda x:x.iloc[1] / x.iloc[0] -1
@@ -89,19 +89,10 @@ class base_data_source(object):
         """对证券的日收益率序列进行resample
         在开始日与结束日之间计算固定频率的收益率
         """
-        dates = self.trade_calendar.get_trade_days(start_date=start_date,end_date=end_date,freq=freq)
-        if (start_date not in dates) and (start_date is not None) and (self.trade_calendar.is_trade_day(start_date)):
-            dates.append(start_date)
-        if (end_date not in dates) and (end_date is not None) and (self.trade_calendar.is_trade_day(end_date)):
-            dates.append(end_date)
-        dates.sort()
-        prices = self.get_history_price(ids, dates=dates, type=type, adjust=True)
-        prices =prices.swaplevel().sort_index().unstack()
-        _cum_return_fun = lambda x: x[1] / x[0] - 1
-        returns = prices.rolling(window=2,axis=1,min_periods=2).apply(_cum_return_fun)
-        returns.columns = pd.MultiIndex.from_product([['returns'], pd.DatetimeIndex(dates)])
-        returns.columns.names = ['returns', 'date']
-        return returns.stack().swaplevel()
+        data_src = '/stocks/' if type=='stock' else '/indexprices/'
+        ret = self.load_factor('daily_returns_%', data_src, start_date=start_date, end_date=end_date) / 100
+
+
 
     def get_past_ndays_return(self, ids, window, start_date, end_date, type='stock'):
         """计算证券在过去N天的累计收益"""

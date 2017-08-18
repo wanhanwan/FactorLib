@@ -15,7 +15,7 @@ from single_factor_test.main import run
 import pandas as pd
 import os
 
-latest_update_date_0 = '20170816'
+latest_update_date_0 = '20170817'
 latest_update_date_1 = '20170816'
 
 UpdateFuncs = [onlist,
@@ -52,7 +52,7 @@ while 1:
         print("单因子回测更新完成...")
     if datetime.now().time() > time(20, 0, 0) and flag1:
         print('即将更新回测数据...')
-        os.system("rqalpha update_bundle")
+        #os.system("rqalpha update_bundle")
         flag1 = 0
         latest_update_date_1 = datetime.now().strftime("%Y%m%d")
         update_nav(start=latest_update_date_1, end=latest_update_date_1)
