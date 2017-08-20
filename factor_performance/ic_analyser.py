@@ -17,7 +17,7 @@ class IC_Calculator(object):
         freq = env._config.freq
         window_len = DATEMULTIPLIER[freq[1]] * int(freq[0])
         dates = np.array(list(map(
-            lambda x: env._trade_calendar.tradeDayOffset(x, window_len), env._factor_group_info_dates)))
+            lambda x: env._trade_calendar.tradeDayOffset(x, window_len, incl_on_offset_today=True), env._factor_group_info_dates)))
         # 计算未来20天的收益分成两部分计算，第一部分是return_@nd中已经包含的日期，第二部分是为包含的日期
         max_date = env._h5DB.get_date_range('return_%dd' % window_len, '/stock_momentum/')[1]
         factor_dates_included = [x for x in env._factor_group_info_dates if x <= DateStr2Datetime(max_date)]

@@ -190,7 +190,7 @@ def _get_smb_factor(mv_portfolio, all_days, stock_returns):
 
 def _get_rf(all_days, **kwargs):
     w.start()
-    start_date = kwargs['data_source'].trade_calendar.tradeDayOffset(all_days[0], -2, '1m')
+    start_date = kwargs['data_source'].trade_calendar.tradeDayOffset(all_days[0], -2, freq='1m')
     data = w.edb("M0043802", start_date, all_days[-1])
     date_range = [x.strftime("%Y%m%d") for x in data.Times]
     rf_data = pd.Series(data.Data[0], index=date_range, name='rf')
@@ -214,7 +214,7 @@ def fama_french(start_date, end_date, **kwargs):
     smb = _get_smb_factor(mv_portfolio, all_days, stock_returns)
     hml = _get_hml_factor(pb_portfolio, all_days, stock_returns)
 
-    factors = pd.concat([rf, mkt, smb, hml], axis=1)
+    factors = pd.concat([rf, mkt, smb, hml], axis=1, join='inner')
     factors.columns = ['rf', 'mkt_rf', 'smb', 'hml']
     kwargs['data_source'].h5DB.save_factor(factors, '/time_series_factors/')
 

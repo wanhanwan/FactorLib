@@ -3,9 +3,8 @@
 import pandas as pd
 import os
 import shutil
-from datetime import datetime
 from utils.datetime_func import Datetime2DateStr, DateStr2Datetime
-from  filemanager import zip_dir, unzip_file
+from filemanager import zip_dir, unzip_file
 
 
 class H5DB(object):

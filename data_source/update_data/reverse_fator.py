@@ -3,7 +3,7 @@ from utils.datetime_func import DateStr2Datetime
 
 # 过去6个月高点下来的收益
 def six_month_return_from_high(start, end, **kwargs):
-    start_date_pricedata = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -150)
+    start_date_pricedata = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -150, incl_on_offset_today=True)
     dates = kwargs['data_source'].trade_calendar.get_trade_days(start_date_pricedata,end)
     close = kwargs['data_source'].load_factor("adj_close", '/stocks/', dates=dates)
     

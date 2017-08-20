@@ -55,7 +55,7 @@ def _load_data(factor_list, idx, freq):
     factors = pd.concat(factors, axis=1)
     dates = np.unique(idx.get_level_values(0).to_pydatetime()).tolist()
     ids = idx.get_level_values(1).unique().tolist()
-    ret_dates = dates + [DateStr2Datetime(data_source.trade_calendar.tradeDayOffset(dates[-1], 1, freq=freq))]
+    ret_dates = dates + [DateStr2Datetime(data_source.trade_calendar.tradeDayOffset(dates[-1], 1, freq=freq, incl_on_offset_today=True))]
     ret = data_source.get_periods_return(ids, dates=ret_dates).groupby('IDs').shift(-1).dropna() * 100
     return pd.concat([ret, factors], axis=1, join='inner')
 

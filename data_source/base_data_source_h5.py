@@ -1,12 +1,15 @@
-import pandas as pd
-import numpy as np
 import os
-
-from const import SW_INDUSTRY_DICT, MARKET_INDEX_DICT
-from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex, windcode_to_tradecode
-from utils.datetime_func import DateStr2Datetime, GetDatetimeLastDay
 from datetime import timedelta, datetime
 from functools import lru_cache
+
+import numpy as np
+import pandas as pd
+from const import SW_INDUSTRY_DICT, MARKET_INDEX_DICT
+from data_source.h5db import H5DB
+from data_source.trade_calendar import tc
+from data_source.tseries import resample_func, resample_returns
+from utils.datetime_func import DateStr2Datetime
+from utils.tool_funcs import parse_industry, get_industry_names, financial_data_reindex, windcode_to_tradecode
 
 
 class base_data_source(object):
@@ -14,7 +17,8 @@ class base_data_source(object):
         self.h5DB = sector.h5DB
         self.trade_calendar = sector.trade_calendar
         self.sector = sector
-        self._load_dividends()
+        self.dividend = None
+        # self._load_dividends()
     
     def _load_dividends(self):
         def _save_convert(x):
@@ -58,96 +62,128 @@ class base_data_source(object):
         """ 提取股票收盘价
         adjust:是否复权
         """
-        if freq != '1d':
-            raise ValueError("no data with frequency of %s, only support 1d now"%freq)
         if type == 'stock':
             database = '/stocks/'
             symbol = 'adj_close' if adjust else 'close'
         else:
             database = '/indexprices/'
             symbol = 'close'
-        if dates is not None:
-            return self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
-        elif (start_date is not None) or (end_date is not None):
-            dates = self.trade_calendar.get_trade_days(start_date, end_date)
-            return self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
+        if dates is None:
+            dates = self.trade_calendar.get_trade_days(start_date, end_date, freq, retstr=None)
+        else:
+            dates1 = self.trade_calendar.get_latest_trade_days(start_date, end_date, freq, retstr=None)
+            dates = pd.DatetimeIndex(dates).intersection(dates1)
+        daily_price = self.h5DB.load_factor(symbol, database, dates=dates, ids=ids)
+        return daily_price
 
-    def get_period_return(self, ids, start_date, end_date, type='stock'):
-        """计算证券的区间收益
-        区间收益 = 开始日收盘价 / 终止日收盘价 - 1
+    def get_period_return(self, ids, start_date, end_date, type='stock', incl_start=False):
+        """
+        计算证券的区间收益
+
+        若incl_start=False
+            区间收益 = 开始日收盘价 / 终止日收盘价 - 1, 即不包含起始日的收益
+        反之，
+            区间收益 = 开始日前收盘价 / 终止日收盘价 - 1, 即不包含起始日的收益
+
         返回: Series(index=IDs)
         """
-        prices = self.get_history_price(ids,dates=[start_date, end_date],
+        if incl_start:
+            start_date = self.trade_calendar.tradeDayOffset(start_date, -1)
+        prices = self.get_history_price(ids, dates=[start_date, end_date],
                                         type=type, adjust=True)
         prices = prices.swaplevel().sort_index().unstack()
-        _cum_return_fun = lambda x:x.iloc[1] / x.iloc[0] -1
+        _cum_return_fun = lambda x: x.iloc[1] / x.iloc[0] - 1
         period_return = prices.apply(_cum_return_fun, axis=1)
         period_return.name = 'returns'
         return period_return.reindex(ids)
 
     def get_fix_period_return(self, ids, freq, start_date, end_date, type='stock'):
-        """对证券的日收益率序列进行resample
-        在开始日与结束日之间计算固定频率的收益率
         """
-        data_src = '/stocks/' if type=='stock' else '/indexprices/'
-        ret = self.load_factor('daily_returns_%', data_src, start_date=start_date, end_date=end_date) / 100
+        对证券的日收益率序列进行resample, 在开始日与结束日之间计算固定频率的收益率
 
+        运算逻辑：
+            提取[start_date, end_date]的所有收益率序列
 
+            应用resample_return函数进行重采样
+
+        """
+        data_src = '/stocks/' if type == 'stock' else '/indexprices/'
+        ret = self.load_factor('daily_returns_%', data_src, start_date=start_date, end_date=end_date, ids=ids) / 100
+        return resample_func(ret, convert_to=freq)
 
     def get_past_ndays_return(self, ids, window, start_date, end_date, type='stock'):
         """计算证券在过去N天的累计收益"""
         data_init_date = self.trade_calendar.tradeDayOffset(start_date, -window)
-        all_dates = self.trade_calendar.get_trade_days(data_init_date, end_date)
-        price = self.get_history_price(ids, all_dates, adjust=True, type=type).unstack().sort_index()
+        price = self.get_history_price(ids, start_date=data_init_date, end_date=end_date,
+                                       adjust=True, type=type).unstack().sort_index()
         cum_returns = (price / price.shift(window) - 1).stack()
-        cum_returns.columns=['return_%dd'%window]
-        return cum_returns.ix[DateStr2Datetime(start_date):DateStr2Datetime(end_date)]
+        cum_returns.columns = ['return_%dd'%window]
+        return cum_returns.loc[DateStr2Datetime(start_date):DateStr2Datetime(end_date)]
 
     def get_periods_return(self, ids, dates, type='stock'):
         """
         计算dates序列中前后两个日期之间的收益率(start_date,end_date]
+
         :param ids: 股票ID序列
+
         :param dates: 日期序列
+
         :return:  stock_returns
+
         """
         def _cal_return(data):
             data_shift = data.shift(1)
-            return data/data_shift - 1
+            return data / data_shift - 1
         dates.sort()
-        close_prices = self.get_history_price(ids,dates=dates,type=type).sort_index()
+        close_prices = self.get_history_price(ids, dates=dates, type=type).sort_index()
         ret = close_prices.groupby('IDs', group_keys=False).apply(_cal_return)
         ret.index.names = ['date', 'IDs']
         ret.columns = ['returns']
         return ret
 
-
     def get_history_bar(self, ids, start, end, adjust=False, type='stock', freq='1d'):
         """
          历史K线
         :param ids: stock ids
-        :param start: start date
-        :param end: end date
-        :param adjust: 是否复权
-        :param type: stock or index
-        :param freq: frequency
-        :return: high open low close avgprice volume amount turnover pctchange
-        """
-        from functools import partial
-        dates = self.trade_calendar.get_trade_days(start, end, freq)
-        daily_dates = self.trade_calendar.get_trade_days(start, end)
-        if type == 'stock':
-            data_dict = {'/stocks/':['high','low','close', 'volume'],
-                         '/stock_liquidity/':['turn']}
-            data = self.h5DB.load_factors(data_dict, ids=ids, dates=daily_dates)
-        groupfunc = partial(self.trade_calendar.latest_trade_day, trade_days=pd.DatetimeIndex(dates))
-        group_dates = data.index.levels[0].to_series().apply(groupfunc)
-        data = data.join(group_dates.rename('group_date'))
-        cal_func = {'high':'max','low':'min',
-                    'close':'last','volume':'sum','turn':'sum'}
-        bar = data.groupby(['IDs','group_date']).agg(cal_func).swaplevel()
-        bar.index.names = ['date', 'IDs']
-        return bar
 
+        :param start: start date
+
+        :param end: end date
+
+        :param adjust: 是否复权
+
+        :param type: stock or index
+
+        :param freq: frequency
+
+        :return: high open low close avgprice volume amount turnover pctchange
+
+        """
+        from empyrical.stats import cum_returns_final
+        agg_func_mapping = {
+            'open': 'first',
+            'high': 'max',
+            'low': 'min',
+            'close': 'last',
+            'volume': 'sum',
+            'vol': 'sum',
+            'turn': 'sum',
+            'amt': 'sum',
+            'daily_returns_%': cum_returns_final
+            }
+
+        data_begin_date = self.trade_calendar.tradeDayOffset(start, -1, freq=freq)
+        daily_dates = self.trade_calendar.get_trade_days(data_begin_date, end)
+        if type == 'stock':
+            data_dict = {'/stocks/': ['high', 'low', 'close', 'volume', 'daily_returns_%'],
+                         '/stock_liquidity/': ['turn']}
+        else:
+            data_dict = {'/indexprices/': ['open', 'high', 'low', 'close', 'amt', 'vol', 'daily_returns_%']}
+        data = self.h5DB.load_factors(data_dict, ids=ids, dates=daily_dates)
+        data['daily_returns_%'] = data['daily_returns_%'] / 100
+        bar = resample_func(data, convert_to=freq, func={x: agg_func_mapping[x] for x in data.columns})
+        # bar.index.names = ['date', 'IDs']
+        return bar
 
     def get_stock_trade_status(self, ids=None, dates=None, start_date=None, end_date=None, freq='1d'):
         """获得股票交易状态信息,包括停牌、ST、涨跌停"""
@@ -269,6 +305,8 @@ class base_data_source(object):
 
     def get_dividends(self, ids, dates):
         """在指定截止日前最近年报的红利数据"""
+        if self.dividend is None:
+            self._load_dividends()
         dates = pd.DatetimeIndex(dates)
         l = []
         for date in dates:
@@ -433,7 +471,12 @@ class sector(object):
         return latest_unst.set_index(['date', 'IDs']).drop('unst_date', axis=1)
 
 
+h5 = H5DB("D:/data/h5")
+sec = sector(h5, tc)
+data_source = base_data_source(sec)
+
 if __name__ == '__main__':
-    from data_source import data_source
-    data_source.sector.get_latest_unst(dates=['20170403','20170405'], months=6)
+    data_source.get_history_bar(['000001','000002'], start ='20100101',end='20161231', freq='2w')
+
+
 

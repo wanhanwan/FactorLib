@@ -52,16 +52,16 @@ class Environment(object):
         # 确定回测的交易日序列
         dt_start = self._config.start_date
         dt_end = self._config.end_date
-        self._all_trade_dates = pd.DatetimeIndex(self._trade_calendar.get_trade_days(
-            dt_start, dt_end))
+        self._all_trade_dates = self._trade_calendar.get_trade_days(
+            dt_start, dt_end, retstr=None)
         
         # 确定测试时需要的分组信息的日期
         group_start_date = self._trade_calendar.tradeDayOffset(
-            self._config.start_date, -1, self._config.freq
+            self._config.start_date, 0, self._config.freq
         )
-        self._factor_group_info_dates = pd.DatetimeIndex(self._trade_calendar.get_trade_days(
-            group_start_date, self._config.end_date, self._config.freq
-        ))
+        self._factor_group_info_dates = self._trade_calendar.get_trade_days(
+            group_start_date, self._config.end_date, self._config.freq, retstr=None
+        )
 
         # IC计算器初始化
         self._ic_calculator.set_stock_returns(self)

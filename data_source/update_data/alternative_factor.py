@@ -8,7 +8,7 @@ from QuantLib.tools import df_rolling
 
 # 特异度
 def iffr(start, end, **kwargs):
-    startdate = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -30)
+    startdate = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -30, incl_on_offset_today=True)
     all_dates = kwargs['data_source'].trade_calendar.get_trade_days(startdate, end)
     daily_ret = kwargs['data_source'].load_factor('daily_returns', '/stocks/', dates=all_dates)
     factors = {'/time_series_factors/': ['rf', 'mkt_rf', 'smb', 'hml']}
@@ -51,7 +51,7 @@ def _calRSquareApplyFunc(data_frame):
 
 # 摘帽日期
 def unst(start, end, **kwargs):
-    start = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -1)
+    start = kwargs['data_source'].trade_calendar.tradeDayOffset(start, -1, incl_on_offset_today=True)
     st = kwargs['data_source'].load_factor('is_st', '/stocks/', start_date=start, end_date=end)
     st_T = st.unstack()
     st_shift = st_T.shift(1)
